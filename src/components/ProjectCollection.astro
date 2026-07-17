@@ -1,0 +1,53 @@
+---
+import type { Project } from '../data/projects';
+
+interface Props {
+	title: string;
+	eyebrow: string;
+	intro: string;
+	backHref: string;
+	projects: Project[];
+	editableKey: string;
+}
+
+const { title, eyebrow, intro, backHref, projects, editableKey } = Astro.props;
+const isLocalEditor = import.meta.env.DEV;
+---
+
+<main>
+	<nav><a class="brand" href="/">LIN WEI<span>.</span></a><a href={backHref}>← 返回服务</a></nav>
+	<header><p>{eyebrow}</p><h1>{title}</h1><p class="intro">{intro}</p></header>
+	<section class="project-grid" aria-label={title}>
+		{projects.map((project) => (
+			<a class:list={['project-card', project.color]} data-edit-card href={`/projects/${project.slug}`}>
+				<div class="cover">{project.images?.[0] ? <img src={project.images[0]} alt="" /> : <><i></i><b></b></>}<span>{project.index}</span></div>
+				<div class="project-info"><h2>{project.title}</h2><div class="tags"><span>{project.school}</span><span>{project.major}</span><span>{project.term}</span></div><p>{project.summary}</p></div>
+			</a>
+		))}
+	</section>
+	<section class="contact"><p>想开始一个项目？</p><a href="mailto:hello@example.com?subject=项目咨询">预约咨询 <span>↗</span></a></section>
+	<footer><span>© 2026 LIN WEI</span><span>SHANGHAI / REMOTE</span></footer>
+	{isLocalEditor && <button class="editor-trigger" type="button" data-edit-toggle data-storage={editableKey}>编辑网站</button>}
+</main>
+
+<style>
+	:global(body) { margin: 0; background: #f4f4f4; color: #1d1d1b; }
+	.editor-trigger { position: fixed; right: 24px; bottom: 24px; z-index: 5; padding: 11px 16px; border: 0; border-radius: 999px; background: #4d4d4d; color: #f4f4f4; cursor: pointer; }.editing [data-edit-card] { outline: 1px dashed #777; outline-offset: 6px; }.editing [data-edit-card] h2, .editing [data-edit-card] .tags, .editing [data-edit-card] .project-info p { cursor: text; }
+	main { max-width: 1440px; margin: auto; padding: 0 42px; } nav { display: flex; justify-content: space-between; padding: 28px 0; border-bottom: 1px solid; } nav a { color: inherit; text-decoration: none; font-size: 14px; }.brand { font-size: 16px; font-weight: 700; letter-spacing: -.05em; }.brand span, .contact span { color: #ff5c35; } header { padding: clamp(80px, 12vw, 160px) 0 92px; } header > p:first-child { margin: 0; font-size: 12px; letter-spacing: .08em; } h1 { margin: 19px 0 47px; font-size: clamp(67px, 10vw, 145px); font-weight: 400; line-height: .86; letter-spacing: -.09em; }.intro { max-width: 490px; margin: 0 0 0 auto; font-size: 18px; line-height: 1.55; }.project-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; }.project-card { min-width: 0; color: inherit; text-decoration: none; }.cover { position: relative; aspect-ratio: 1 / .78; overflow: hidden; }.cover i, .cover b { position: absolute; display: block; border: 2px solid #1d1d1b; transition: transform .45s cubic-bezier(.2,.7,.2,1); }.cover span { position: absolute; right: 13px; bottom: 8px; font-size: 12px; }.cover img { width: 100%; height: 100%; object-fit: cover; }.coral .cover { background: #ff8165; }.coral .cover i { width: 48%; aspect-ratio: 1; top: 18%; left: 17%; border-radius: 50%; background: #f5c94b; }.coral .cover b { width: 38%; aspect-ratio: 1; right: 12%; bottom: 13%; background: #f4f4f4; transform: rotate(24deg); }.blue .cover { background: #7195b8; }.blue .cover i { width: 54%; aspect-ratio: 1; top: 19%; left: 20%; background: #f4f4f4; transform: rotate(22deg); }.blue .cover b { width: 27%; aspect-ratio: 1; top: 14%; right: 15%; border-radius: 50%; background: #ff5c35; }.yellow .cover { background: #f5c94b; }.yellow .cover i { width: 63%; aspect-ratio: 1; top: 14%; left: 17%; border-radius: 50%; background: #d5e4e0; }.yellow .cover b { width: 30%; aspect-ratio: 1; right: 12%; bottom: 11%; border-radius: 50%; background: #ff8165; }.project-info { padding: 14px 2px 4px; }.project-info h2 { margin: 0 0 12px; font-size: clamp(24px, 2.2vw, 34px); line-height: 1; letter-spacing: -.07em; font-weight: 400; }.tags { display: flex; flex-wrap: wrap; gap: 6px; }.tags span { padding: 4px 8px; border: 1px solid; border-radius: 20px; font-size: 10px; }.project-info p { margin: 16px 0 0; font-family: Futura, 'Futura PT', sans-serif; font-size: 12px; line-height: 1.5; }.project-card:hover .cover i { transform: rotate(42deg) scale(1.12); }.project-card:hover .cover b { transform: rotate(-25deg) translate(-8px, -5px) scale(1.08); }.contact { padding: 140px 0; text-align: center; }.contact p { margin: 0 0 15px; }.contact a { color: inherit; text-decoration: none; border-bottom: 2px solid; font-size: clamp(38px, 5vw, 73px); letter-spacing: -.08em; } footer { display: flex; justify-content: space-between; padding: 22px 0 32px; border-top: 1px solid; font-size: 11px; letter-spacing: .06em; } @media (max-width: 720px) { main { padding: 0 18px; } header { padding: 78px 0; } h1 { font-size: 72px; }.intro { margin: 0; font-size: 16px; }.project-grid { grid-template-columns: 1fr; gap: 28px; }.contact { padding: 90px 0; } footer { gap: 15px; font-size: 9px; } }
+</style>
+
+<script>
+	const toggle = document.querySelector<HTMLButtonElement>('[data-edit-toggle]');
+	if (toggle) {
+		const key = `service-projects:${toggle.dataset.storage}`;
+		const cards = Array.from(document.querySelectorAll<HTMLElement>('[data-edit-card]'));
+		const apply = (saved: string[] | null) => saved?.forEach((html, index) => { if (cards[index]) cards[index].innerHTML = html; });
+		apply(JSON.parse(localStorage.getItem(key) ?? 'null'));
+		toggle.addEventListener('click', () => {
+			const editing = document.body.classList.toggle('editing');
+			cards.forEach((card) => card.querySelectorAll<HTMLElement>('h2, .tags, .project-info p').forEach((item) => item.contentEditable = String(editing)));
+			toggle.textContent = editing ? '保存修改' : '编辑网站';
+			if (!editing) localStorage.setItem(key, JSON.stringify(cards.map((card) => card.innerHTML)));
+		});
+	}
+</script>

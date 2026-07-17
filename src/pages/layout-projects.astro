@@ -1,0 +1,10 @@
+---
+import BaseHead from '../components/BaseHead.astro';
+import ProjectCollection from '../components/ProjectCollection.astro';
+import { projects } from '../data/projects';
+
+const collection = projects.filter((project) => project.slug === 'editorial-system-for-architecture');
+---
+
+<!doctype html>
+<html lang="zh-CN"><head><BaseHead title="排版辅导项目 · 林未" description="排版辅导项目陈列" /></head><body><ProjectCollection title="排版辅导" eyebrow="EDITORIAL & LAYOUT / SELECTED WORK" intro="从复杂的项目资料中建立清晰的阅读层级、节奏与视觉系统。" backHref="/portfolio-coaching" projects={collection} editableKey="layout" /></body></html>

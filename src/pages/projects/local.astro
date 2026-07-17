@@ -1,0 +1,60 @@
+---
+import BaseHead from '../../components/BaseHead.astro';
+const isLocalEditor = import.meta.env.DEV;
+---
+
+<!doctype html>
+<html lang="zh-CN">
+	<head><BaseHead title="本地项目 · 林未" description="本地创建的作品集项目" /></head>
+	<body>
+		<main>
+			<nav><a class="brand" href="/">LIN WEI<span>.</span></a><a href="/portfolio-projects">← 返回项目陈列</a></nav>
+			<section data-local-project><p class="label">LOCAL PROJECT</p><h1>正在加载项目…</h1></section>
+			<footer><span>© 2026 LIN WEI</span><span>LOCAL EDITOR</span></footer>
+			{isLocalEditor && <>
+				<button class="editor-trigger" type="button" data-editor-open>编辑网站</button>
+				<dialog class="local-editor" data-editor>
+					<form data-editor-form>
+						<div class="editor-heading"><p>LOCAL PROJECT EDITOR</p><button type="button" data-editor-close>×</button></div>
+						<label>项目名称<input name="title" required /></label>
+						<label>副标题<input name="subtitle" /></label>
+						<label>项目简介<textarea name="intro" rows="7"></textarea></label>
+						<label>成果<textarea name="result" rows="4"></textarea></label>
+						<label>辅导老师<input name="mentorName" /></label>
+						<label>老师介绍<textarea name="mentorBio" rows="4"></textarea></label>
+						<label>项目图片 <small>可多选；第一张同时会作为项目封面。</small><input name="images" type="file" accept="image/*" multiple /></label>
+						<div class="editor-actions"><button type="submit">保存修改</button></div>
+					</form>
+				</dialog>
+			</>}
+		</main>
+	</body>
+</html>
+
+<style is:global>
+	body { margin: 0; background: #f4f4f4; color: #4d4d4d; font-family: Atkinson, sans-serif; } main { max-width: 1440px; margin: auto; padding: 0 42px; } nav { display: flex; justify-content: space-between; padding: 28px 0; border-bottom: 1px solid; } nav a { color: inherit; text-decoration: none; font-size: 14px; }.brand { font-size: 16px; font-weight: 700; letter-spacing: -.05em; }.brand span { color: #ff5c35; }.project { padding: 95px 0 0; }.label { margin: 0; font-size: 12px; letter-spacing: .08em; text-transform: uppercase; }.project h1 { margin: 24px 0 62px; font-size: clamp(55px, 9vw, 126px); line-height: .9; font-weight: 400; letter-spacing: -.08em; }.subtitle { margin: 18px 0 0; font-size: 14px; }.project-image { display: block; width: 100%; max-height: 650px; object-fit: cover; }.details { display: grid; grid-template-columns: 28% 1fr; padding: 35px 0 55px; border-top: 1px solid; }.details > p:last-child { max-width: 1440px; margin: 0; font-size: 14px; line-height: 1.55; }.mentor h2 { margin: 0 0 13px; font-size: clamp(34px, 4vw, 58px); font-weight: 400; letter-spacing: -.07em; }.tags { display: flex; flex-wrap: wrap; gap: 7px; margin: 18px 0 35px; }.tags span { padding: 5px 9px; border: 1px solid; border-radius: 999px; font-size: 11px; } footer { display: flex; justify-content: space-between; padding: 22px 0 32px; border-top: 1px solid; font-size: 11px; letter-spacing: .06em; }.editor-trigger { position: fixed; right: 24px; bottom: 24px; z-index: 10; padding: 11px 16px; border: 1px solid #4d4d4d; border-radius: 999px; background: #4d4d4d; color: #f4f4f4; font-size: 13px; cursor: pointer; }.local-editor { width: min(620px, calc(100% - 30px)); max-height: calc(100vh - 40px); padding: 0; border: 1px solid #4d4d4d; background: #f4f4f4; }.local-editor::backdrop { background: rgba(0,0,0,.42); }.local-editor form { display: grid; gap: 15px; padding: 24px; overflow-y: auto; }.editor-heading, .editor-actions { display: flex; justify-content: space-between; align-items: center; }.editor-heading p { margin: 0; font-size: 12px; letter-spacing: .08em; }.editor-heading button { border: 0; background: transparent; font-size: 27px; cursor: pointer; }.local-editor label { display: grid; gap: 7px; font-size: 13px; }.local-editor small { color: #777; font-size: 11px; }.local-editor input, .local-editor textarea { box-sizing: border-box; width: 100%; padding: 10px; border: 1px solid #999; background: #fff; font: inherit; }.editor-actions button { padding: 10px 14px; border: 1px solid #4d4d4d; background: #4d4d4d; color: #f4f4f4; cursor: pointer; } @media (max-width: 720px) { main { padding: 0 18px; }.project { padding-top: 75px; }.project h1 { font-size: 62px; }.details { grid-template-columns: 1fr; gap: 18px; }.details > p:last-child { font-size: 14px; } footer { gap: 15px; font-size: 9px; } }
+</style>
+
+<script>
+	const container = document.querySelector<HTMLElement>('[data-local-project]')!;
+	const id = new URLSearchParams(window.location.search).get('id');
+	const editor = document.querySelector<HTMLDialogElement>('[data-editor]');
+	const openDatabase = () => new Promise<IDBDatabase>((resolve, reject) => { const request = indexedDB.open('portfolio-local-editor', 1); request.onupgradeneeded = () => request.result.createObjectStore('projects'); request.onsuccess = () => resolve(request.result); request.onerror = () => reject(request.error); });
+	const getItems = async () => { const database = await openDatabase(); return await new Promise<any[]>((resolve, reject) => { const request = database.transaction('projects').objectStore('projects').get('local-project-list-v2'); request.onsuccess = () => resolve(request.result ?? []); request.onerror = () => reject(request.error); }); };
+	const saveItems = async (items: any[]) => { const database = await openDatabase(); await new Promise<void>((resolve, reject) => { const request = database.transaction('projects', 'readwrite').objectStore('projects').put(items, 'local-project-list-v2'); request.onsuccess = () => resolve(); request.onerror = () => reject(request.error); }); };
+	const defaults = { subtitle: '项目副标题', intro: '在这里填写项目的背景、灵感来源与核心概念。', result: '在这里填写项目的成果、录取信息或最终呈现。', mentorName: '项目辅导老师', mentorBio: '在这里填写辅导老师的背景与专长。' };
+	let project: any;
+	const render = () => {
+		if (!project) { container.innerHTML = '<p class="label">PROJECT NOT FOUND</p><h1>未找到这个本地项目。</h1>'; return; }
+		const images = project.images?.length ? project.images : project.cover ? [project.cover] : [];
+		container.innerHTML = `<section class="project"><p class="label">LOCAL PROJECT</p><h1>${project.title || '新项目'}</h1>${images[0] ? `<img class="project-image" src="${images[0]}" alt="${project.title || '新项目'}">` : ''}<p class="subtitle">${project.subtitle || defaults.subtitle}</p><div class="tags">${(project.tags || []).map((tag: string) => `<span>${tag}</span>`).join('')}</div></section><section class="details"><p class="label">简介</p><p>${project.intro || project.summary || defaults.intro}</p></section><section class="details"><p class="label">成果</p><p>${project.result || defaults.result}</p></section><section class="details mentor"><p class="label">项目辅导老师</p><div><h2>${project.mentorName || defaults.mentorName}</h2><p>${project.mentorBio || defaults.mentorBio}</p></div></section>`;
+	};
+	const fileToDataUrl = (file: File) => new Promise<string>((resolve, reject) => { const reader = new FileReader(); reader.onload = () => resolve(String(reader.result)); reader.onerror = () => reject(reader.error); reader.readAsDataURL(file); });
+	const setupEditor = () => {
+		if (!editor || !project) return; const form = editor.querySelector<HTMLFormElement>('[data-editor-form]')!;
+		const fill = () => ['title', 'subtitle', 'intro', 'result', 'mentorName', 'mentorBio'].forEach((key) => { const input = form.elements.namedItem(key) as HTMLInputElement | HTMLTextAreaElement; input.value = project[key] || (defaults as any)[key] || ''; });
+		document.querySelector<HTMLButtonElement>('[data-editor-open]')?.addEventListener('click', () => { fill(); editor.showModal(); }); editor.querySelector<HTMLButtonElement>('[data-editor-close]')?.addEventListener('click', () => editor.close());
+		form.addEventListener('submit', async (event) => { event.preventDefault(); const data = new FormData(form); ['title', 'subtitle', 'intro', 'result', 'mentorName', 'mentorBio'].forEach((key) => project[key] = String(data.get(key) ?? '')); const files = data.getAll('images').filter((file): file is File => file instanceof File && file.size > 0); if (files.length) { project.images = await Promise.all(files.map(fileToDataUrl)); project.cover = project.images[0]; } const items = await getItems(); await saveItems(items.map((item) => item.id === project.id ? project : item)); render(); editor.close(); });
+	};
+	getItems().then((items) => { project = items.find((item) => item.id === id); render(); setupEditor(); }).catch(() => render());
+</script>
