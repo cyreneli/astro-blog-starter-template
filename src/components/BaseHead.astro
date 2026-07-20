@@ -45,3 +45,17 @@ const { title, description, image = '/blog-placeholder-1.jpg' } = Astro.props;
 <meta property="twitter:title" content={title} />
 <meta property="twitter:description" content={description} />
 <meta property="twitter:image" content={new URL(image, Astro.url)} />
+
+<style is:global>
+	.site-back-button { position: fixed; top: 22px; left: 22px; z-index: 20; display: grid; place-items: center; width: 32px; height: 32px; padding: 0; border: 1px solid #4d4d4d; border-radius: 50%; background: #f4f4f4; color: #4d4d4d; font-size: 17px; cursor: pointer; }.site-back-button:hover { background: #4d4d4d; color: #f4f4f4; } @media (max-width: 720px) { .site-back-button { top: 12px; left: 12px; } }
+</style>
+
+<script>
+	window.addEventListener('DOMContentLoaded', () => {
+		if (window.location.pathname === '/' || document.querySelector('[data-go-back]')) return;
+		const button = document.createElement('button');
+		button.className = 'site-back-button'; button.type = 'button'; button.textContent = '←'; button.setAttribute('aria-label', '返回上一页');
+		button.addEventListener('click', () => window.history.length > 1 ? window.history.back() : window.location.assign('/'));
+		document.body.append(button);
+	});
+</script>

@@ -2,62 +2,33 @@
 import BaseHead from '../components/BaseHead.astro';
 
 const services = [
-	{
-		number: '01',
-		title: '作品集辅导',
-		en: 'PORTFOLIO MENTORING',
-		description: '从选题、项目叙事到最终呈现，一起梳理能代表你思考方式的作品集。让每个项目都有清晰的逻辑，也有属于你的表达。',
-		items: ['方向与院校定位', '项目筛选与结构梳理', '叙事、文案与呈现反馈'],
-		className: 'peach',
-		href: '/portfolio-projects',
-	},
-	{
-		number: '02',
-		title: '排版辅导',
-		en: 'EDITORIAL & LAYOUT',
-		description: '把内容变得可读、好看且有节奏。针对作品集、提案或个人出版物，建立一套经得起细看的版式系统。',
-		items: ['信息层级与阅读动线', '网格、字体与图像系统', '单页精修与整体一致性'],
-		className: 'blue',
-		href: '/layout-projects',
-	},
-	{
-		number: '03',
-		title: '交互技术制作',
-		en: 'INTERACTIVE PROTOTYPING',
-		description: '将概念真正做成可以被体验的原型。适合需要网页、交互装置或数字作品呈现支持的创意项目。',
-		items: ['网页与交互原型制作', '创意编码与视觉实验', '项目展示与技术呈现建议'],
-		className: 'yellow',
-		href: '/interactive-projects',
-	},
+	{ number: '01', title: '作品集辅导', en: 'PORTFOLIO MENTORING', href: '/portfolio-projects', description: '从选题、项目叙事到最终呈现，一起梳理能够代表你思考方式的作品集。', items: ['方向与院校定位', '项目结构梳理', '叙事与呈现反馈'], color: 'coral' },
+	{ number: '02', title: '排版辅导', en: 'EDITORIAL & LAYOUT', href: '/layout-projects', description: '让内容变得可读、好看且有节奏，建立一套经得起细看的版式系统。', items: ['信息层级', '网格与字体系统', '单页精修'], color: 'blue' },
+	{ number: '03', title: '交互技术制作', en: 'INTERACTIVE PROTOTYPING', href: '/interactive-projects', description: '将概念做成可以被体验的原型，为网页、互动装置和数字作品提供技术支持。', items: ['网页与交互原型', '创意编程', '展览与技术呈现'], color: 'yellow' },
 ];
 ---
 
 <!doctype html>
 <html lang="zh-CN">
-	<head><BaseHead title="作品集辅导 · 林未" description="作品集辅导、排版辅导与交互技术制作服务" /></head>
+	<head><BaseHead title="作品集辅导 · Cyrene 文无" description="作品集、排版及交互技术辅导。" /></head>
 	<body>
 		<main>
-			<nav>
-				<a class="brand" href="/">LIN WEI<span>.</span></a>
-				<a class="back" href="/">← 返回首页</a>
+			<nav aria-label="主导航">
+				<a class="brand" href="/">Cyrene 文无</a>
+				<div class="nav-links">
+					<a class="active" href="/portfolio-coaching">Case <span>案例</span></a>
+					<a href="/#about">Me <span>我</span></a>
+					<a href="/contact">Contact <span>联系</span></a>
+				</div>
 			</nav>
 
-			<header>
-				<p class="kicker">PORTFOLIO SUPPORT / 2026</p>
-				<h1>把想法，<br /><em>做成作品。</em></h1>
-				<div class="intro">
-					<p>面向准备申请、转型或希望整理个人作品的创作者。用一对一的交流与具体的制作支持，陪你把好想法变成有说服力的呈现。</p>
-					<p class="scroll">向下探索 <span>↓</span></p>
-				</div>
-			</header>
-
-			<section class="services" aria-label="服务项目">
+			<section class="services" aria-label="辅导服务">
 				{services.map((service) => (
-					<a class:list={['service', service.className]} href={service.href}>
+					<a class:list={['service', service.color]} href={service.href}>
 						<div class="service-meta"><span>{service.number}</span><span>{service.en}</span></div>
-						<div class="art" aria-hidden="true"><div></div><i></i><b></b></div>
+						<div class="art" aria-hidden="true"><i></i><b></b></div>
 						<div class="service-body">
-							<h2>{service.title}</h2>
+							<h1>{service.title}</h1>
 							<p>{service.description}</p>
 							<ul>{service.items.map((item) => <li>{item}</li>)}</ul>
 							<span class="service-link">查看项目 <b>↗</b></span>
@@ -69,31 +40,38 @@ const services = [
 			<section class="contact">
 				<p>不确定该从哪里开始？</p>
 				<h2>聊聊你的项目。</h2>
-				<a href="mailto:hello@example.com?subject=作品集辅导咨询">预约咨询 <span>↗</span></a>
+				<a href="/contact">预约咨询 <span>↗</span></a>
 			</section>
-			<footer><span>© 2026 LIN WEI</span><span>SHANGHAI / REMOTE</span></footer>
+			<footer><span>© 2026 CYRENE 文无</span><span>HANGZHOU / REMOTE</span></footer>
 		</main>
 	</body>
 </html>
 
 <style>
-	:global(body) { background: #f4f4f4; color: #1d1d1b; }
-	main { width: auto; max-width: 1440px; margin: 0 auto; padding: 0 42px; }
-	nav { display: flex; justify-content: space-between; padding: 28px 0; border-bottom: 1px solid #1d1d1b; }
-	.brand, .back { color: inherit; text-decoration: none; font-size: 14px; }.brand { font-weight: 700; letter-spacing: -.05em; font-size: 16px; }.brand span { color: #ff5c35; }
-	header { padding: clamp(85px, 13vw, 180px) 0 105px; }.kicker { margin: 0; font-size: 12px; letter-spacing: .08em; }
-	h1 { margin: 22px 0 0; font-size: clamp(64px, 11vw, 160px); letter-spacing: -.09em; line-height: .84; font-weight: 400; } h1 em { color: #ff5c35; font-weight: inherit; }
-	.intro { display: flex; justify-content: space-between; align-items: end; gap: 30px; max-width: 740px; margin: 76px 0 0 auto; }.intro p { max-width: 465px; margin: 0; font-size: 18px; line-height: 1.55; }.intro .scroll { width: auto; font-size: 12px; letter-spacing: .04em; white-space: nowrap; }.scroll span { color: #ff5c35; font-size: 20px; }
-	.services { border-top: 1px solid #1d1d1b; }.service { position: relative; display: grid; grid-template-columns: 20% 33% 1fr; gap: 28px; min-height: 440px; padding: 27px 0; border-bottom: 1px solid #1d1d1b; overflow: hidden; }.service-meta { display: flex; justify-content: space-between; font-size: 11px; letter-spacing: .06em; writing-mode: vertical-rl; transform: rotate(180deg); }.service-body { align-self: end; max-width: 450px; padding-bottom: 6px; }.service-body h2 { margin: 0 0 13px; font-size: clamp(39px, 5vw, 64px); font-weight: 400; letter-spacing: -.08em; }.service-body p { margin: 0 0 24px; font-size: 16px; line-height: 1.55; }.service-body ul { display: flex; flex-wrap: wrap; gap: 8px; padding: 0; margin: 0; list-style: none; }.service-body li { padding: 5px 10px; border: 1px solid currentColor; border-radius: 30px; font-size: 12px; }.art { position: relative; align-self: center; height: 270px; }.art div, .art i, .art b { position: absolute; display: block; border: 2px solid #1d1d1b; }.peach .art div { inset: 14px 18%; background: #ff8165; border-radius: 50% 50% 0 0; }.peach .art i { width: 70%; height: 42%; bottom: 14px; left: 15%; background: #f3f0e9; transform: rotate(-17deg); }.peach .art b { width: 29px; height: 29px; top: 70px; right: 23%; border-radius: 50%; background: #f5c94b; }.blue .art div { width: 76%; height: 76%; top: 10%; left: 12%; background: #7195b8; transform: rotate(17deg); }.blue .art i { width: 55%; height: 55%; top: 22%; left: 24%; background: #f3f0e9; }.blue .art b { width: 32%; height: 32%; bottom: 0; right: 0; border-radius: 50%; background: #ff5c35; }.yellow .art div { width: 84%; height: 84%; top: 7%; left: 8%; border-radius: 50%; background: #f5c94b; }.yellow .art i { width: 2px; height: 108%; top: -4%; left: 50%; background: #1d1d1b; border: 0; transform: rotate(45deg); }.yellow .art b { width: 58px; height: 58px; top: 30%; left: 40%; border-radius: 50%; background: #d5e4e0; }
-	.project-section { padding-top: 135px; }.project-heading { display: flex; justify-content: space-between; align-items: end; padding-bottom: 22px; border-bottom: 1px solid; }.project-heading p { margin: 0; font-size: 12px; letter-spacing: .08em; }.project-heading h2 { margin: 0; font-size: clamp(48px, 6vw, 82px); font-weight: 400; letter-spacing: -.08em; }.project-list { display: grid; grid-template-columns: repeat(3, 1fr); }.project-card { min-height: 425px; padding: 18px; color: #1d1d1b; text-decoration: none; border-bottom: 1px solid; }.project-card + .project-card { border-left: 1px solid; }.project-art { position: relative; height: 210px; overflow: hidden; border: 1px solid; }.project-card p { margin: 19px 0 10px; font-size: 11px; letter-spacing: .05em; }.project-card h3 { min-height: 70px; margin: 0; font-size: clamp(27px, 2.5vw, 37px); line-height: 1.03; letter-spacing: -.07em; font-weight: 400; }.project-card > span { display: inline-block; margin-top: 21px; padding-bottom: 3px; border-bottom: 1px solid; font-size: 12px; }.project-card b { margin-left: 16px; font-size: 16px; font-weight: 400; }.project-art i, .project-art b { position: absolute; display: block; border: 2px solid #1d1d1b; transition: transform .45s ease; }.coral .project-art { background: #ff8165; }.coral .project-art i { width: 46%; aspect-ratio: 1; left: 20%; top: 18%; border-radius: 50%; background: #f5c94b; }.coral .project-art b { width: 36%; aspect-ratio: 1; right: 15%; bottom: 13%; background: #f3f0e9; transform: rotate(25deg); }.blue .project-art { background: #7195b8; }.blue .project-art i { width: 54%; aspect-ratio: 1; left: 20%; top: 21%; background: #f3f0e9; transform: rotate(20deg); }.blue .project-art b { width: 25%; aspect-ratio: 1; right: 15%; top: 12%; border-radius: 50%; background: #ff5c35; }.yellow .project-art { background: #f5c94b; }.yellow .project-art i { width: 62%; aspect-ratio: 1; left: 18%; top: 14%; border-radius: 50%; background: #d5e4e0; }.yellow .project-art b { width: 29%; aspect-ratio: 1; right: 13%; bottom: 11%; border-radius: 50%; background: #ff8165; }.project-card:hover .project-art i { transform: rotate(45deg) scale(1.1); }.project-card:hover .project-art b { transform: rotate(-25deg) translate(-8px, -4px); }.project-card:hover h3 { text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 5px; }.contact { padding: 140px 0; }.contact p { margin: 0 0 10px; font-size: 15px; }.contact h2 { margin: 0; font-size: clamp(49px, 7vw, 100px); font-weight: 400; letter-spacing: -.08em; }.contact a { display: inline-block; margin-top: 38px; padding-bottom: 5px; border-bottom: 1px solid; color: inherit; text-decoration: none; font-size: 17px; }.contact a span { margin-left: 23px; color: #ff5c35; font-size: 23px; } footer { display: flex; justify-content: space-between; padding: 22px 0 32px; border-top: 1px solid #1d1d1b; font-size: 11px; letter-spacing: .06em; }
-	@media (max-width: 720px) { main { padding: 0 18px; } header { padding: 80px 0; } h1 { font-size: clamp(60px, 18vw, 100px); } .intro { display: block; margin-top: 52px; }.intro .scroll { margin-top: 32px; }.service { grid-template-columns: 50px 1fr; min-height: 0; gap: 15px; padding: 20px 0 32px; }.service-meta { grid-row: span 2; }.art { height: 210px; }.service-body { grid-column: 2; }.service-body h2 { font-size: 43px; }.project-section { padding-top: 85px; }.project-list { grid-template-columns: 1fr; }.project-card + .project-card { border-left: 0; }.project-card { min-height: 0; padding: 18px 0 26px; }.project-art { height: 190px; }.project-card h3 { min-height: 0; }.contact { padding: 90px 0; } footer { gap: 16px; font-size: 9px; } }
-	.service { color: inherit; text-decoration: none; transition: background .3s ease, padding .3s ease; }
-	.service-link { display: inline-block; margin-top: 22px; padding-bottom: 4px; border-bottom: 1px solid; font-size: 13px; }
-	.service-link b { margin-left: 16px; font-size: 17px; font-weight: 400; }
-	.service:hover { padding-left: 16px; padding-right: 16px; background: rgba(255,255,255,.4); }
-	.service .art div, .service .art i, .service .art b { transition: transform .45s ease; }
-	.service:hover .art div { transform: rotate(-14deg) scale(1.07); }
-	.service:hover .art i { transform: rotate(24deg) translate(8px, -4px); }
-	.service:hover .art b { transform: translate(10px, -7px) scale(1.15); }
-	@media (max-width: 720px) { .service:hover { padding-left: 8px; padding-right: 8px; } }
+	:global(html) { background: #2c2c2c !important; }
+	:global(body) { margin: 0; background: #2c2c2c !important; color: #f4f4f4 !important; font-family: Futura, 'Futura PT', 'Helvetica Neue', Arial, sans-serif; }
+	main { box-sizing: border-box; width: 100%; min-height: 100svh; padding: 70px 10.15vw 0; }
+	nav { display: flex; align-items: center; justify-content: space-between; margin-right: -4.8vw; }
+	.brand, .nav-links a { color: #6f6f6f; font-size: 24px; font-weight: 400; line-height: 1; letter-spacing: -.04em; text-decoration: none; transition: color 180ms ease; }
+	.nav-links { display: flex; gap: clamp(30px, 5.9vw, 90px); }
+	.nav-links a:hover, .nav-links a:focus-visible, .nav-links .active { color: #f4f4f4; }
+	.services { margin-top: clamp(120px, 13vw, 200px); border-top: 1px solid #656565; }
+	.service { position: relative; display: grid; grid-template-columns: 16% 34% minmax(0, 1fr); gap: 28px; min-height: 400px; padding: 28px 0; border-bottom: 1px solid #656565; color: inherit; overflow: hidden; text-decoration: none; transition: background-color 200ms ease, padding 200ms ease; }
+	.service:hover, .service:focus-visible { padding-inline: 16px; background: #353535; }
+	.service-meta { display: flex; justify-content: space-between; color: #8a8a8a; font-size: 11px; letter-spacing: .06em; writing-mode: vertical-rl; transform: rotate(180deg); }
+	.art { position: relative; align-self: center; height: 250px; }
+	.art::before, .art i, .art b { position: absolute; display: block; content: ''; border: 2px solid #202020; transition: transform 300ms ease; }
+	.coral .art::before { inset: 15px 18%; border-radius: 50% 50% 0 0; background: #ff8165; }.coral .art i { width: 68%; height: 42%; bottom: 15px; left: 15%; background: #f4f4f4; transform: rotate(-17deg); }.coral .art b { width: 29px; height: 29px; top: 68px; right: 23%; border-radius: 50%; background: #f5c94b; }
+	.blue .art::before { width: 76%; height: 76%; top: 10%; left: 12%; background: #7195b8; transform: rotate(17deg); }.blue .art i { width: 55%; height: 55%; top: 22%; left: 24%; background: #f4f4f4; }.blue .art b { width: 32%; height: 32%; right: 0; bottom: 0; border-radius: 50%; background: #ff8165; }
+	.yellow .art::before { width: 84%; height: 84%; top: 7%; left: 8%; border-radius: 50%; background: #f5c94b; }.yellow .art i { width: 2px; height: 108%; top: -4%; left: 50%; border: 0; background: #202020; transform: rotate(45deg); }.yellow .art b { width: 58px; height: 58px; top: 30%; left: 40%; border-radius: 50%; background: #d5e4e0; }
+	.service:hover .art::before { transform: rotate(-14deg) scale(1.06); }.service:hover .art i { transform: rotate(24deg) translate(8px, -4px); }.service:hover .art b { transform: translate(10px, -7px) scale(1.15); }
+	.service-body { align-self: end; max-width: 490px; padding-bottom: 7px; }
+	.service-body h1, .contact h2 { margin: 0; color: #f4f4f4; font-weight: 400; letter-spacing: -.07em; }
+	.service-body h1 { margin-bottom: 14px; font-size: clamp(40px, 5vw, 64px); line-height: 1; }
+	.service-body p { margin: 0 0 23px; color: #b0b0b0; font-size: 16px; line-height: 1.55; }
+	.service-body ul { display: flex; flex-wrap: wrap; gap: 8px; margin: 0; padding: 0; list-style: none; }.service-body li { padding: 5px 10px; border: 1px solid #777; border-radius: 30px; font-size: 12px; }
+	.service-link { display: inline-block; margin-top: 22px; padding-bottom: 4px; border-bottom: 1px solid currentColor; font-size: 13px; }.service-link b { margin-left: 16px; font-size: 17px; font-weight: 400; }
+	.contact { padding: 140px 0; }.contact p { margin: 0 0 10px; color: #a0a0a0; font-size: 15px; }.contact h2 { font-size: clamp(49px, 7vw, 100px); }.contact a { display: inline-block; margin-top: 38px; padding-bottom: 5px; border-bottom: 1px solid; color: #f4f4f4; font-size: 17px; text-decoration: none; }.contact a span { margin-left: 23px; font-size: 23px; }
+	footer { display: flex; justify-content: space-between; padding: 22px 0 32px; border-top: 1px solid #656565; color: #858585; font-size: 11px; letter-spacing: .06em; }
+	@media (max-width: 720px) { main { padding: 30px 24px 0; } nav { margin-right: 0; }.brand, .nav-links a { font-size: 16px; }.nav-links { gap: 16px; }.nav-links span { display: none; }.services { margin-top: 94px; }.service { grid-template-columns: 44px 1fr; min-height: 0; gap: 15px; padding: 20px 0 32px; }.service:hover { padding-inline: 7px; }.service-meta { grid-row: span 2; }.art { height: 210px; }.service-body { grid-column: 2; }.service-body h1 { font-size: 43px; }.contact { padding: 90px 0; } footer { gap: 16px; font-size: 9px; } }
 </style>
