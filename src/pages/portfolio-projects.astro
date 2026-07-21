@@ -138,7 +138,7 @@ const isLocalEditor = import.meta.env.DEV;
 			grid.innerHTML = '';
 			items.forEach((item, index) => {
 			const wrapper = document.createElement('div'); wrapper.className = 'project-card-wrap';
-			const card = document.createElement('a'); card.className = `project-card ${item.color ?? ['coral', 'blue', 'yellow'][index % 3]}`; card.href = item.href || '#';
+			const card = document.createElement('a'); card.className = `project-card ${item.color ?? ['coral', 'blue', 'yellow'][index % 3]}`; card.href = item.href && item.href !== '#' ? item.href : (String(item.id).startsWith('local-') ? '/projects/local?id=' + item.id : '#');
 				const cover = document.createElement('div'); cover.className = 'cover';
 				if (item.cover) { const image = document.createElement('img'); image.src = item.cover; image.alt = ''; cover.append(image); }
 				else { cover.append(document.createElement('i'), document.createElement('b')); }
@@ -196,8 +196,10 @@ const isLocalEditor = import.meta.env.DEV;
 				title: item.title || '新项目',
 				tags: item.tags?.length ? item.tags : ['目标院校', '目标专业', '27FALL'],
 				summary: item.summary || '这是一个正在整理中的项目。你可以在这里补充项目背景、核心概念与最终成果。',
+				href: item.href && item.href !== '#' ? item.href : (String(item.id).startsWith('local-') ? '/projects/local?id=' + item.id : '#'),
 			}));
 			renderItems(items);
+			void saveItems(items);
 		}).catch(() => undefined);
 	}
 </script>
