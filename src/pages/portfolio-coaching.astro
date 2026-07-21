@@ -13,14 +13,14 @@ const services = [
 	<head><BaseHead title="作品集辅导 · Cyrene 文无" description="作品集、排版及交互技术辅导。" /></head>
 	<body>
 		<main>
-			<nav aria-label="主导航">
+			<header class="site-header">
 				<a class="brand" href="/">Cyrene 文无</a>
-				<div class="nav-links">
+				<nav aria-label="主导航">
 					<a class="active" href="/portfolio-coaching">Case <span>案例</span></a>
 					<a href="/#about">Me <span>我</span></a>
 					<a href="/contact">Contact <span>联系</span></a>
-				</div>
-			</nav>
+				</nav>
+			</header>
 
 			<section class="services" aria-label="辅导服务">
 				{services.map((service) => (
@@ -51,10 +51,11 @@ const services = [
 	:global(html) { background: #2c2c2c !important; }
 	:global(body) { margin: 0; background: #2c2c2c !important; color: #f4f4f4 !important; font-family: Futura, 'Futura PT', 'Helvetica Neue', Arial, sans-serif; }
 	main { box-sizing: border-box; width: 100%; min-height: 100svh; padding: 70px 10.15vw 0; }
-	nav { display: flex; align-items: center; justify-content: space-between; margin-right: -4.8vw; }
-	.brand, .nav-links a { color: #6f6f6f; font-size: 24px; font-weight: 400; line-height: 1; letter-spacing: -.04em; text-decoration: none; transition: color 180ms ease; }
-	.nav-links { display: flex; gap: clamp(30px, 5.9vw, 90px); }
-	.nav-links a:hover, .nav-links a:focus-visible, .nav-links .active { color: #f4f4f4; }
+	.site-header { position: relative; z-index: 2; display: flex; align-items: center; justify-content: space-between; margin-right: -4.8vw; }
+	.brand, nav a { color: #f2f2f2; font-size: 24px; font-weight: 400; line-height: 1; letter-spacing: -.04em; text-decoration: none; }
+	nav { display: flex; gap: clamp(30px, 5.9vw, 90px); }
+	nav a { color: #6f6f6f; transition: color 180ms ease; }
+	nav a:hover, nav a:focus-visible, nav a.active { color: #f4f4f4; }
 	.services { margin-top: clamp(120px, 13vw, 200px); border-top: 1px solid #656565; }
 	.service { position: relative; display: grid; grid-template-columns: 16% 34% minmax(0, 1fr); gap: 28px; min-height: 400px; padding: 28px 0; border-bottom: 1px solid #656565; color: inherit; overflow: hidden; text-decoration: none; transition: background-color 200ms ease, padding 200ms ease; }
 	.service:hover, .service:focus-visible { padding-inline: 16px; background: #353535; }
@@ -73,5 +74,5 @@ const services = [
 	.service-link { display: inline-block; margin-top: 22px; padding-bottom: 4px; border-bottom: 1px solid currentColor; font-size: 13px; }.service-link b { margin-left: 16px; font-size: 17px; font-weight: 400; }
 	.contact { padding: 140px 0; }.contact p { margin: 0 0 10px; color: #a0a0a0; font-size: 15px; }.contact h2 { font-size: clamp(49px, 7vw, 100px); }.contact a { display: inline-block; margin-top: 38px; padding-bottom: 5px; border-bottom: 1px solid; color: #f4f4f4; font-size: 17px; text-decoration: none; }.contact a span { margin-left: 23px; font-size: 23px; }
 	footer { display: flex; justify-content: space-between; padding: 22px 0 32px; border-top: 1px solid #656565; color: #858585; font-size: 11px; letter-spacing: .06em; }
-	@media (max-width: 720px) { main { padding: 30px 24px 0; } nav { margin-right: 0; }.brand, .nav-links a { font-size: 16px; }.nav-links { gap: 16px; }.nav-links span { display: none; }.services { margin-top: 94px; }.service { grid-template-columns: 44px 1fr; min-height: 0; gap: 15px; padding: 20px 0 32px; }.service:hover { padding-inline: 7px; }.service-meta { grid-row: span 2; }.art { height: 210px; }.service-body { grid-column: 2; }.service-body h1 { font-size: 43px; }.contact { padding: 90px 0; } footer { gap: 16px; font-size: 9px; } }
+	@media (max-width: 720px) { main { padding: 30px 24px 0; } .site-header { margin-right: 0; }.brand, nav a { font-size: 16px; } nav { gap: 16px; } nav a span { display: none; }.services { margin-top: 94px; }.service { grid-template-columns: 44px 1fr; min-height: 0; gap: 15px; padding: 20px 0 32px; }.service:hover { padding-inline: 7px; }.service-meta { grid-row: span 2; }.art { height: 210px; }.service-body { grid-column: 2; }.service-body h1 { font-size: 43px; }.contact { padding: 90px 0; } footer { gap: 16px; font-size: 9px; } }
 </style>

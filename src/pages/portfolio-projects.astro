@@ -9,7 +9,12 @@ const isLocalEditor = import.meta.env.DEV;
 	<head><BaseHead title="作品集辅导项目 · 林未" description="作品集辅导项目陈列" /></head>
 	<body>
 		<main>
-			<nav><a class="brand" href="/">LIN WEI<span>.</span></a><a href="/portfolio-coaching">← 返回服务</a></nav>
+			<nav aria-label="主导航">
+				<a class="brand" href="/">Cyrene 文无</a>
+				<a class="active" href="/portfolio-coaching">Case <span>案例</span></a>
+				<a href="/#about">Me <span>我</span></a>
+				<a href="/contact">Contact <span>联系</span></a>
+			</nav>
 			<header><p>PORTFOLIO MENTORING / SELECTED WORK</p><h1>项目陈列</h1><p class="intro">每一份作品集，都始于不同的经验与问题。这里记录部分已经完成的辅导项目。</p></header>
 			<section class="project-grid" aria-label="作品集辅导项目">
 				{projects.map((project) => (
@@ -55,6 +60,33 @@ const isLocalEditor = import.meta.env.DEV;
 	@media (min-width: 721px) { .project-card:nth-child(3n + 1) { border-left: 0; } }
 	.card-edit { position: absolute; top: 9px; right: 9px; z-index: 2; padding: 6px 9px; border: 1px solid #4d4d4d; border-radius: 999px; background: #f4f4f4; color: #4d4d4d; font-size: 11px; cursor: pointer; }.card-edit:hover { background: #4d4d4d; color: #f4f4f4; }
 	.local-editor { width: min(580px, calc(100% - 30px)); max-height: calc(100vh - 40px); padding: 0; border: 1px solid #4d4d4d; background: #f4f4f4; color: #4d4d4d; }.local-editor::backdrop { background: rgba(0,0,0,.42); }.local-editor form { display: grid; gap: 15px; padding: 24px; overflow-y: auto; }.editor-heading, .editor-actions { display: flex; justify-content: space-between; align-items: center; gap: 12px; }.editor-heading p { margin: 0; font-size: 12px; letter-spacing: .08em; }.editor-heading button { border: 0; background: transparent; font-size: 27px; cursor: pointer; }.local-editor label { display: grid; gap: 7px; font-size: 13px; }.local-editor small { color: #777; font-size: 11px; }.local-editor input, .local-editor textarea, .local-editor select { width: 100%; box-sizing: border-box; padding: 10px; border: 1px solid #9b9b9b; border-radius: 0; background: #fff; color: #1d1d1b; font: inherit; }.local-editor textarea { resize: vertical; }.new-project { justify-self: start; border: 0; padding: 0; background: transparent; color: inherit; text-decoration: underline; cursor: pointer; }.editor-actions { padding-top: 8px; }.editor-actions button { padding: 10px 14px; border: 1px solid #4d4d4d; background: transparent; color: inherit; cursor: pointer; }.editor-actions button[type='submit'] { background: #4d4d4d; color: #f4f4f4; }
+	/* 首页统一主题覆盖 */
+	html, body { background: #2c2c2c !important; color: #f4f4f4 !important; font-family: Futura, 'Futura PT', 'Helvetica Neue', Arial, sans-serif; }
+	main { box-sizing: border-box; width: 100%; max-width: none; min-height: 100svh; margin: 0; padding: 70px 10.15vw 0; }
+	nav { display: grid; grid-template-columns: 1fr auto auto auto; align-items: center; column-gap: clamp(30px, 5.9vw, 90px); margin-right: -4.8vw; padding: 0; border: 0; }
+	nav .brand, nav a { color: #f2f2f2; font-size: 24px; font-weight: 400; line-height: 1; letter-spacing: -.04em; text-decoration: none; }
+	nav a { color: #6f6f6f; transition: color 180ms ease; }
+	nav a:hover, nav a:focus-visible, nav a.active { color: #f4f4f4; }
+	header { padding-top: clamp(110px, 13vw, 190px); }
+	header > p:first-child, .intro, .project-info p, .contact p { color: #a0a0a0; }
+	h1, .project-info h2 { color: #f4f4f4; }
+	.project-grid { border: 0; }
+	.project-card { color: #f4f4f4; }
+	.cover { border-color: #666; }
+	.cover i, .cover b { border-color: #202020; }
+	.tags span { border-color: #777; }
+	.project-add-card { border-color: #777; color: #a0a0a0; }
+	.project-add-card:hover { border-color: #f4f4f4; background: #f4f4f4; color: #2c2c2c; }
+	.card-edit { border-color: #777; background: #2c2c2c; color: #f4f4f4; }
+	.card-edit:hover { background: #f4f4f4; color: #2c2c2c; }
+	.contact a { color: #f4f4f4; }
+	footer { border-color: #666; color: #8a8a8a; }
+	@media (max-width: 720px) {
+		main { padding: 30px 24px 0; }
+		nav { column-gap: 16px; margin-right: 0; }
+		nav .brand, nav a { font-size: 16px; }
+		nav a span { display: none; }
+	}
 </style>
 
 <script>

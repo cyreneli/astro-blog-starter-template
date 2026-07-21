@@ -24,25 +24,30 @@ import BaseHead from '../components/BaseHead.astro';
 			</section>
 
 			<section class="contact-options" aria-label="联系方式">
-				<a class="contact-item" href="https://www.xiaohongshu.com/" target="_blank" rel="noreferrer" aria-label="小红书">
+				<a class="contact-item" href="https://xhslink.com/m/AYAIGSWXbfz" target="_blank" rel="noreferrer" aria-label="小红书">
 					<span class="circle">
 						<span class="xiaohongshu">小红书</span>
 					</span>
 					<span class="contact-name">Xiaohongshu</span>
 				</a>
-				<a class="contact-item" href="weixin://" aria-label="微信">
+				<button class="contact-item" type="button" data-wechat-open aria-label="查看微信二维码">
 					<span class="circle">
 						<span class="wechat" aria-hidden="true"><i></i><b></b></span>
 					</span>
 					<span class="contact-name">WeChat</span>
-				</a>
-				<a class="contact-item" href="https://www.behance.net/" target="_blank" rel="noreferrer" aria-label="Behance">
+				</button>
+				<a class="contact-item" href="https://outlook.office.com/mail/deeplink/compose?to=Wenwulxy%40outlook.com&subject=Portfolio%20Inquiry" target="_blank" rel="noreferrer" aria-label="发送邮件至 Wenwulxy@outlook.com">
 					<span class="circle">
-						<span class="behance">Be</span>
+						<span class="mail-icon" aria-hidden="true"></span>
 					</span>
-					<span class="contact-name">Behance</span>
+					<span class="contact-name">Wenwulxy@outlook.com</span>
 				</a>
 			</section>
+			<dialog class="wechat-dialog" data-wechat-dialog aria-label="微信二维码">
+				<button class="dialog-close" type="button" data-wechat-close aria-label="关闭">×</button>
+				<img src="/projects/UI/ec5c4348053ea317671ef60edf95694b.jpg" alt="微信二维码：文无 Cyrene" />
+				<p>扫码添加我为朋友</p>
+			</dialog>
 		</main>
 	</body>
 </html>
@@ -96,7 +101,7 @@ import BaseHead from '../components/BaseHead.astro';
 		gap: clamp(62px, 5.8vw, 104px);
 		margin-top: clamp(130px, 10.5vw, 180px);
 	}
-	.contact-item { color: #f4f4f4; text-align: center; text-decoration: none; }
+	.contact-item { padding: 0; border: 0; color: #f4f4f4; text-align: center; text-decoration: none; background: transparent; font: inherit; cursor: pointer; }
 	.circle {
 		display: grid;
 		place-items: center;
@@ -126,19 +131,38 @@ import BaseHead from '../components/BaseHead.astro';
 		font-weight: 700;
 		letter-spacing: -0.08em;
 	}
-	.behance {
-		display: grid;
-		place-items: center;
-		width: 148px;
-		height: 148px;
-		border-radius: 50%;
-		background: #2b2a43;
-		color: #000;
-		font-family: Arial, sans-serif;
-		font-size: 76px;
-		font-weight: 700;
-		letter-spacing: -0.1em;
+	.mail-icon {
+		position: relative;
+		display: block;
+		box-sizing: border-box;
+		width: 126px;
+		height: 88px;
+		border: 5px solid #2b2a43;
+		border-radius: 7px;
 	}
+	.mail-icon::before, .mail-icon::after {
+		content: '';
+		position: absolute;
+		top: 26px;
+		width: 72px;
+		height: 5px;
+		background: #2b2a43;
+	}
+	.mail-icon::before { left: -7px; transform: rotate(34deg); transform-origin: left center; }
+	.mail-icon::after { right: -7px; transform: rotate(-34deg); transform-origin: right center; }
+	.wechat-dialog {
+		box-sizing: border-box;
+		width: min(520px, calc(100vw - 40px));
+		padding: 18px 18px 28px;
+		border: 1px solid #777;
+		background: #f4f4f4;
+		color: #2c2c2c;
+		text-align: center;
+	}
+	.wechat-dialog::backdrop { background: rgb(0 0 0 / 72%); }
+	.wechat-dialog img { display: block; width: 100%; max-height: 70vh; object-fit: contain; }
+	.wechat-dialog p { margin: 14px 0 0; font-size: 16px; }
+	.dialog-close { position: absolute; top: 7px; right: 9px; border: 0; background: transparent; color: #2c2c2c; font-size: 28px; cursor: pointer; }
 	.wechat { position: relative; display: block; width: 128px; height: 100px; }
 	.wechat i, .wechat b { position: absolute; display: block; border-radius: 50%; background: #2b2a43; }
 	.wechat i { top: 8px; left: 2px; width: 77px; height: 62px; }
@@ -176,7 +200,17 @@ import BaseHead from '../components/BaseHead.astro';
 		.contact-options { gap: 24px; margin-top: 88px; }
 		.circle { width: 25vw; min-width: 92px; }
 		.xiaohongshu { width: 54px; height: 54px; font-size: 16px; }
-		.behance { width: 64px; height: 64px; font-size: 34px; }
+		.mail-icon { width: 54px; height: 38px; border-width: 3px; }
+		.mail-icon::before, .mail-icon::after { top: 11px; width: 32px; height: 3px; }
 		.wechat { transform: scale(.52); transform-origin: center; }
 	}
 </style>
+
+<script>
+	const wechatDialog = document.querySelector<HTMLDialogElement>('[data-wechat-dialog]');
+	document.querySelector('[data-wechat-open]')?.addEventListener('click', () => wechatDialog?.showModal());
+	document.querySelector('[data-wechat-close]')?.addEventListener('click', () => wechatDialog?.close());
+	wechatDialog?.addEventListener('click', (event) => {
+		if (event.target === wechatDialog) wechatDialog.close();
+	});
+</script>

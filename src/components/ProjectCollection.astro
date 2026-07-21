@@ -10,44 +10,203 @@ interface Props {
 	editableKey: string;
 }
 
-const { title, eyebrow, intro, backHref, projects, editableKey } = Astro.props;
+const { title, eyebrow, intro, projects, editableKey } = Astro.props;
 const isLocalEditor = import.meta.env.DEV;
 ---
 
 <main>
-	<nav><a class="brand" href="/">LIN WEI<span>.</span></a><a href={backHref}>← 返回服务</a></nav>
-	<header><p>{eyebrow}</p><h1>{title}</h1><p class="intro">{intro}</p></header>
-	<section class="project-grid" aria-label={title}>
+	<nav aria-label="主导航">
+		<a class="brand" href="/">Cyrene 文无</a>
+		<a class="active" href="/portfolio-coaching">Case <span>案例</span></a>
+		<a href="/#about">Me <span>我</span></a>
+		<a href="/contact">Contact <span>联系</span></a>
+	</nav>
+
+	<header>
+		<p>{eyebrow}</p>
+		<h1>{title}</h1>
+		<p class="intro">{intro}</p>
+	</header>
+
+	<section class="project-grid" aria-label={title} data-project-grid data-collection={editableKey}>
 		{projects.map((project) => (
-			<a class:list={['project-card', project.color]} data-edit-card href={`/projects/${project.slug}`}>
-				<div class="cover">{project.images?.[0] ? <img src={project.images[0]} alt="" /> : <><i></i><b></b></>}<span>{project.index}</span></div>
-				<div class="project-info"><h2>{project.title}</h2><div class="tags"><span>{project.school}</span><span>{project.major}</span><span>{project.term}</span></div><p>{project.summary}</p></div>
-			</a>
+			<div class="project-card-wrap" data-project-card>
+				<a class:list={['project-card', project.color]} href={'/projects/' + project.slug}>
+					<div class="cover">{project.images?.[0] ? <img src={project.images[0]} alt="" /> : <><i></i><b></b></>}<span>{project.index}</span></div>
+					<div class="project-info"><h2>{project.title}</h2><div class="tags"><span>{project.school}</span><span>{project.major}</span><span>{project.term}</span></div><p>{project.summary}</p></div>
+				</a>
+				{isLocalEditor && <button class="card-edit" type="button" data-edit-card aria-label="编辑项目">编辑</button>}
+			</div>
 		))}
+		{isLocalEditor && <button class="project-add-card" type="button" data-add-card aria-label="增加新的项目">+</button>}
 	</section>
-	<section class="contact"><p>想开始一个项目？</p><a href="mailto:hello@example.com?subject=项目咨询">预约咨询 <span>↗</span></a></section>
-	<footer><span>© 2026 LIN WEI</span><span>SHANGHAI / REMOTE</span></footer>
-	{isLocalEditor && <button class="editor-trigger" type="button" data-edit-toggle data-storage={editableKey}>编辑网站</button>}
+	{isLocalEditor && (
+		<dialog class="project-create-dialog" data-create-dialog>
+			<form data-create-form>
+				<div class="dialog-heading"><p>NEW PROJECT</p><button type="button" data-create-close aria-label="关闭">×</button></div>
+				<label>项目名称<input name="title" placeholder="未命名项目" /></label>
+				<label>项目标签 <small>用逗号分隔，例如：目标院校、目标专业、27FALL</small><input name="tags" placeholder="目标院校, 目标专业, 27FALL" /></label>
+				<label>项目简介<textarea name="summary" rows="5" placeholder="填写项目简介"></textarea></label>
+				<label>项目封面<input name="cover" type="file" accept="image/*" /></label>
+				<div class="dialog-actions"><button class="delete-project" type="button" data-delete-project hidden>删除项目</button><button type="button" data-create-close>取消</button><button type="submit">创建项目</button></div>
+			</form>
+		</dialog>
+	)}
+
+	<section class="contact"><p>想开始一个项目？</p><a href="/contact">预约咨询 <span>↗</span></a></section>
+	<footer><span>© 2026 CYRENE 文无</span><span>HANGZHOU / REMOTE</span></footer>
 </main>
 
-<style>
-	:global(body) { margin: 0; background: #f4f4f4; color: #1d1d1b; }
-	.editor-trigger { position: fixed; right: 24px; bottom: 24px; z-index: 5; padding: 11px 16px; border: 0; border-radius: 999px; background: #4d4d4d; color: #f4f4f4; cursor: pointer; }.editing [data-edit-card] { outline: 1px dashed #777; outline-offset: 6px; }.editing [data-edit-card] h2, .editing [data-edit-card] .tags, .editing [data-edit-card] .project-info p { cursor: text; }
-	main { max-width: 1440px; margin: auto; padding: 0 42px; } nav { display: flex; justify-content: space-between; padding: 28px 0; border-bottom: 1px solid; } nav a { color: inherit; text-decoration: none; font-size: 14px; }.brand { font-size: 16px; font-weight: 700; letter-spacing: -.05em; }.brand span, .contact span { color: #ff5c35; } header { padding: clamp(80px, 12vw, 160px) 0 92px; } header > p:first-child { margin: 0; font-size: 12px; letter-spacing: .08em; } h1 { margin: 19px 0 47px; font-size: clamp(67px, 10vw, 145px); font-weight: 400; line-height: .86; letter-spacing: -.09em; }.intro { max-width: 490px; margin: 0 0 0 auto; font-size: 18px; line-height: 1.55; }.project-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; }.project-card { min-width: 0; color: inherit; text-decoration: none; }.cover { position: relative; aspect-ratio: 1 / .78; overflow: hidden; }.cover i, .cover b { position: absolute; display: block; border: 2px solid #1d1d1b; transition: transform .45s cubic-bezier(.2,.7,.2,1); }.cover span { position: absolute; right: 13px; bottom: 8px; font-size: 12px; }.cover img { width: 100%; height: 100%; object-fit: cover; }.coral .cover { background: #ff8165; }.coral .cover i { width: 48%; aspect-ratio: 1; top: 18%; left: 17%; border-radius: 50%; background: #f5c94b; }.coral .cover b { width: 38%; aspect-ratio: 1; right: 12%; bottom: 13%; background: #f4f4f4; transform: rotate(24deg); }.blue .cover { background: #7195b8; }.blue .cover i { width: 54%; aspect-ratio: 1; top: 19%; left: 20%; background: #f4f4f4; transform: rotate(22deg); }.blue .cover b { width: 27%; aspect-ratio: 1; top: 14%; right: 15%; border-radius: 50%; background: #ff5c35; }.yellow .cover { background: #f5c94b; }.yellow .cover i { width: 63%; aspect-ratio: 1; top: 14%; left: 17%; border-radius: 50%; background: #d5e4e0; }.yellow .cover b { width: 30%; aspect-ratio: 1; right: 12%; bottom: 11%; border-radius: 50%; background: #ff8165; }.project-info { padding: 14px 2px 4px; }.project-info h2 { margin: 0 0 12px; font-size: clamp(24px, 2.2vw, 34px); line-height: 1; letter-spacing: -.07em; font-weight: 400; }.tags { display: flex; flex-wrap: wrap; gap: 6px; }.tags span { padding: 4px 8px; border: 1px solid; border-radius: 20px; font-size: 10px; }.project-info p { margin: 16px 0 0; font-family: Futura, 'Futura PT', sans-serif; font-size: 12px; line-height: 1.5; }.project-card:hover .cover i { transform: rotate(42deg) scale(1.12); }.project-card:hover .cover b { transform: rotate(-25deg) translate(-8px, -5px) scale(1.08); }.contact { padding: 140px 0; text-align: center; }.contact p { margin: 0 0 15px; }.contact a { color: inherit; text-decoration: none; border-bottom: 2px solid; font-size: clamp(38px, 5vw, 73px); letter-spacing: -.08em; } footer { display: flex; justify-content: space-between; padding: 22px 0 32px; border-top: 1px solid; font-size: 11px; letter-spacing: .06em; } @media (max-width: 720px) { main { padding: 0 18px; } header { padding: 78px 0; } h1 { font-size: 72px; }.intro { margin: 0; font-size: 16px; }.project-grid { grid-template-columns: 1fr; gap: 28px; }.contact { padding: 90px 0; } footer { gap: 15px; font-size: 9px; } }
+<style is:global>
+	html { background: #2c2c2c !important; }
+	body { margin: 0; background: #2c2c2c !important; color: #f4f4f4 !important; font-family: Futura, 'Futura PT', 'Helvetica Neue', Arial, sans-serif; }
+	main { box-sizing: border-box; width: 100%; min-height: 100svh; padding: 70px 10.15vw 0; }
+	nav { display: grid; grid-template-columns: 1fr auto auto auto; align-items: center; column-gap: clamp(30px, 5.9vw, 90px); margin-right: -4.8vw; }
+	.brand, nav a { color: #f2f2f2; font-size: 24px; font-weight: 400; line-height: 1; letter-spacing: -.04em; text-decoration: none; }
+	nav a { color: #6f6f6f; transition: color 180ms ease; }
+	nav a:hover, nav a:focus-visible, nav a.active { color: #f4f4f4; }
+	header { padding: clamp(110px, 13vw, 190px) 0 92px; }
+	header > p:first-child { margin: 0; color: #9b9b9b; font-size: 12px; letter-spacing: .08em; }
+	h1 { margin: 19px 0 47px; color: #f4f4f4; font-size: clamp(67px, 10vw, 145px); font-weight: 400; line-height: .86; letter-spacing: -.09em; }
+	.intro { max-width: 490px; margin: 0 0 0 auto; color: #a0a0a0; font-size: 18px; line-height: 1.55; }
+	.project-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; }
+	.project-card-wrap { position: relative; min-width: 0; }
+	.project-card { display: block; min-width: 0; color: #f4f4f4; text-decoration: none; }
+	.cover { position: relative; aspect-ratio: 1 / .78; overflow: hidden; background: #1f1f1f; }
+	.cover img { width: 100%; height: 100%; object-fit: cover; }
+	.cover i, .cover b { position: absolute; display: block; border: 2px solid #202020; transition: transform .45s cubic-bezier(.2,.7,.2,1); }
+	.cover span { position: absolute; right: 13px; bottom: 8px; color: #f4f4f4; font-size: 12px; }
+	.coral .cover { background: #ff8165; }.coral .cover i { width: 48%; aspect-ratio: 1; top: 18%; left: 17%; border-radius: 50%; background: #f5c94b; }.coral .cover b { width: 38%; aspect-ratio: 1; right: 12%; bottom: 13%; background: #f4f4f4; transform: rotate(24deg); }
+	.blue .cover { background: #7195b8; }.blue .cover i { width: 54%; aspect-ratio: 1; top: 19%; left: 20%; background: #f4f4f4; transform: rotate(22deg); }.blue .cover b { width: 27%; aspect-ratio: 1; top: 14%; right: 15%; border-radius: 50%; background: #ff5c35; }
+	.yellow .cover { background: #f5c94b; }.yellow .cover i { width: 63%; aspect-ratio: 1; top: 14%; left: 17%; border-radius: 50%; background: #d5e4e0; }.yellow .cover b { width: 30%; aspect-ratio: 1; right: 12%; bottom: 11%; border-radius: 50%; background: #ff8165; }
+	.project-info { padding: 14px 2px 4px; }.project-info h2 { min-height: 0; margin: 0 0 12px; color: #f4f4f4; font-size: clamp(24px, 2.2vw, 34px); font-weight: 400; line-height: 1; letter-spacing: -.07em; }.tags { display: flex; flex-wrap: wrap; gap: 6px; }.tags span { padding: 4px 8px; border: 1px solid #777; border-radius: 20px; font-size: 10px; }.project-info p { margin: 16px 0 0; color: #a0a0a0; font-size: 12px; line-height: 1.5; }
+	.project-card:hover .cover i { transform: rotate(42deg) scale(1.12); }.project-card:hover .cover b { transform: rotate(-25deg) translate(-8px, -5px) scale(1.08); }.project-card:hover h2 { text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 5px; }
+	.project-add-card { display: grid; place-items: center; aspect-ratio: 1 / .78; padding: 0; border: 1px dashed #777; background: transparent; color: #a0a0a0; font-size: clamp(42px, 5vw, 70px); font-weight: 300; cursor: pointer; }.project-add-card:hover { border-color: #f4f4f4; background: #f4f4f4; color: #2c2c2c; }
+	.card-edit { position: absolute; top: 9px; right: 9px; z-index: 2; padding: 6px 9px; border: 1px solid #777; border-radius: 999px; background: #2c2c2c; color: #f4f4f4; font-size: 11px; cursor: pointer; }.card-edit:hover { background: #f4f4f4; color: #2c2c2c; }
+	.project-create-dialog { width: min(580px, calc(100% - 30px)); max-height: calc(100vh - 40px); padding: 0; border: 1px solid #777; background: #2c2c2c; color: #f4f4f4; }.project-create-dialog::backdrop { background: rgb(0 0 0 / 72%); }.project-create-dialog form { display: grid; gap: 15px; padding: 24px; overflow-y: auto; }.dialog-heading, .dialog-actions { display: flex; justify-content: space-between; align-items: center; gap: 12px; }.dialog-heading p { margin: 0; font-size: 12px; letter-spacing: .08em; }.dialog-heading button { border: 0; background: transparent; color: #f4f4f4; font-size: 27px; cursor: pointer; }.project-create-dialog label { display: grid; gap: 7px; color: #f4f4f4; font-size: 13px; }.project-create-dialog small { color: #9b9b9b; font-size: 11px; }.project-create-dialog input, .project-create-dialog textarea { width: 100%; box-sizing: border-box; padding: 10px; border: 1px solid #777; border-radius: 0; background: #f4f4f4; color: #2c2c2c; font: inherit; }.project-create-dialog textarea { resize: vertical; }.dialog-actions { padding-top: 8px; }.dialog-actions button { padding: 10px 14px; border: 1px solid #777; background: transparent; color: #f4f4f4; cursor: pointer; }.dialog-actions button[type='submit'] { border-color: #f4f4f4; background: #f4f4f4; color: #2c2c2c; }
+	.contact { padding: 140px 0; text-align: center; }.contact p { margin: 0 0 15px; color: #a0a0a0; }.contact a { color: #f4f4f4; text-decoration: none; border-bottom: 2px solid; font-size: clamp(38px, 5vw, 73px); letter-spacing: -.08em; }
+	footer { display: flex; justify-content: space-between; padding: 22px 0 32px; border-top: 1px solid #666; color: #8a8a8a; font-size: 11px; letter-spacing: .06em; }
+	@media (max-width: 720px) { main { padding: 30px 24px 0; } nav { column-gap: 16px; margin-right: 0; }.brand, nav a { font-size: 16px; } nav a span { display: none; } header { padding: 90px 0 78px; } h1 { font-size: 72px; }.intro { margin: 0; font-size: 16px; }.project-grid { grid-template-columns: 1fr; gap: 28px; }.contact { padding: 90px 0; } footer { gap: 15px; font-size: 9px; } }
 </style>
 
 <script>
-	const toggle = document.querySelector<HTMLButtonElement>('[data-edit-toggle]');
-	if (toggle) {
-		const key = `service-projects:${toggle.dataset.storage}`;
-		const cards = Array.from(document.querySelectorAll<HTMLElement>('[data-edit-card]'));
-		const apply = (saved: string[] | null) => saved?.forEach((html, index) => { if (cards[index]) cards[index].innerHTML = html; });
-		apply(JSON.parse(localStorage.getItem(key) ?? 'null'));
-		toggle.addEventListener('click', () => {
-			const editing = document.body.classList.toggle('editing');
-			cards.forEach((card) => card.querySelectorAll<HTMLElement>('h2, .tags, .project-info p').forEach((item) => item.contentEditable = String(editing)));
-			toggle.textContent = editing ? '保存修改' : '编辑网站';
-			if (!editing) localStorage.setItem(key, JSON.stringify(cards.map((card) => card.innerHTML)));
+	const grid = document.querySelector<HTMLElement>('[data-project-grid]');
+	const createDialog = document.querySelector<HTMLDialogElement>('[data-create-dialog]');
+	const createForm = document.querySelector<HTMLFormElement>('[data-create-form]');
+	const collection = grid?.dataset.collection || 'layout';
+	const storageKey = 'service-extra-projects:' + collection;
+	const deleteButton = document.querySelector<HTMLButtonElement>('[data-delete-project]');
+
+	const openDatabase = () => new Promise<IDBDatabase>((resolve, reject) => {
+		const request = indexedDB.open('portfolio-local-editor', 1);
+		request.onupgradeneeded = () => request.result.createObjectStore('projects');
+		request.onsuccess = () => resolve(request.result);
+		request.onerror = () => reject(request.error);
+	});
+	const getItems = async () => {
+		const database = await openDatabase();
+		return await new Promise<any[]>((resolve, reject) => {
+			const request = database.transaction('projects').objectStore('projects').get(storageKey);
+			request.onsuccess = () => resolve(request.result || []);
+			request.onerror = () => reject(request.error);
 		});
-	}
+	};
+	const saveItems = async (items: any[]) => {
+		const database = await openDatabase();
+		await new Promise<void>((resolve, reject) => {
+			const request = database.transaction('projects', 'readwrite').objectStore('projects').put(items, storageKey);
+			request.onsuccess = () => resolve();
+			request.onerror = () => reject(request.error);
+		});
+	};
+	const addCard = (item: any) => {
+		if (!grid) return;
+		const card = document.createElement('div');
+		card.className = 'project-card-wrap';
+		const link = document.createElement('a');
+		link.className = 'project-card ' + (item.color || 'blue');
+		link.href = item.href;
+		const cover = document.createElement('div');
+		cover.className = 'cover';
+		if (item.cover) { const image = document.createElement('img'); image.src = item.cover; image.alt = ''; cover.append(image); }
+		else cover.append(document.createElement('i'), document.createElement('b'));
+		const marker = document.createElement('span'); marker.textContent = 'NEW'; cover.append(marker);
+		const info = document.createElement('div'); info.className = 'project-info';
+		const heading = document.createElement('h2'); heading.textContent = item.title;
+		const tagList = document.createElement('div'); tagList.className = 'tags';
+		(item.tags || []).forEach((tag: string) => { const tagItem = document.createElement('span'); tagItem.textContent = tag; tagList.append(tagItem); });
+		const description = document.createElement('p'); description.textContent = item.summary;
+		info.append(heading, tagList, description); link.append(cover, info); card.append(link);
+		const edit = document.createElement('button');
+		edit.type = 'button';
+		edit.className = 'card-edit';
+		edit.dataset.editId = item.id;
+		edit.textContent = '编辑';
+		card.append(edit);
+		const addButton = grid.querySelector('[data-add-card]');
+		if (addButton) grid.insertBefore(card, addButton);
+	};
+	const closeDialog = () => createDialog?.close();
+	document.querySelectorAll('[data-create-close]').forEach((button) => button.addEventListener('click', closeDialog));
+	grid?.addEventListener('click', (event) => {
+		const target = event.target as HTMLElement;
+		if (target.closest('[data-add-card]')) {
+			event.preventDefault();
+			delete createForm?.dataset.editId;
+			createForm?.reset();
+			if (deleteButton) deleteButton.hidden = true;
+			createDialog?.showModal();
+			return;
+		}
+		const editButton = target.closest<HTMLButtonElement>('[data-edit-id]');
+		if (!editButton || !createForm) return;
+		event.preventDefault();
+		getItems().then((items) => {
+			const item = items.find((entry) => entry.id === editButton.dataset.editId);
+			if (!item) return;
+			(createForm.elements.namedItem('title') as HTMLInputElement).value = item.title || '';
+			(createForm.elements.namedItem('tags') as HTMLInputElement).value = (item.tags || []).join(', ');
+			(createForm.elements.namedItem('summary') as HTMLTextAreaElement).value = item.summary || '';
+			createForm.dataset.editId = item.id;
+			if (deleteButton) deleteButton.hidden = false;
+			createDialog?.showModal();
+		});
+	});
+	deleteButton?.addEventListener('click', async () => {
+		const id = createForm?.dataset.editId;
+		if (!id || !window.confirm('确定要删除这个项目吗？')) return;
+		const items = await getItems();
+		await saveItems(items.filter((item) => item.id !== id));
+		closeDialog();
+		window.location.reload();
+	});
+	createForm?.addEventListener('submit', async (event) => {
+		event.preventDefault();
+		const formData = new FormData(createForm);
+		const id = 'local-' + Date.now();
+		const cover = formData.get('cover');
+		const coverData = cover instanceof File && cover.size ? await new Promise<string>((resolve) => { const reader = new FileReader(); reader.onload = () => resolve(String(reader.result)); reader.readAsDataURL(cover); }) : '';
+		const editingId = createForm.dataset.editId;
+		const items = await getItems();
+		const existing = items.find((entry) => entry.id === editingId);
+		const item = {
+			id: editingId || id,
+			title: String(formData.get('title') || '未命名项目'),
+			tags: String(formData.get('tags') || '目标院校, 目标专业, 27FALL').split(',').map((tag) => tag.trim()).filter(Boolean),
+			summary: String(formData.get('summary') || '在这里填写项目简介。'),
+			cover: coverData || existing?.cover || '',
+			color: 'blue',
+			href: existing?.href || '/projects/local?id=' + (editingId || id) + '&collection=' + collection,
+		};
+		if (existing) items.splice(items.indexOf(existing), 1, item);
+		else items.push(item);
+		await saveItems(items);
+		if (existing) window.location.reload();
+		else addCard(item);
+		createForm.reset();
+		delete createForm.dataset.editId;
+		if (deleteButton) deleteButton.hidden = true;
+		closeDialog();
+	});
+	getItems().then((items) => items.forEach(addCard)).catch(() => undefined);
 </script>
