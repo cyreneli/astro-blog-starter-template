@@ -1,29 +1,37 @@
 ---
 import BaseHead from '../../components/BaseHead.astro';
-import { projects } from '../../data/projects';
+import { projects as seedProjects } from '../../data/projects';
+import { isAuthenticated, readProjects, type CmsBindings } from '../../lib/cms';
 
-export function getStaticPaths() {
-	return projects.map((project) => ({ params: { slug: project.slug }, props: { project } }));
+export const prerender = false;
+const cmsEnv = Astro.locals.runtime.env as CmsBindings;
+const isCmsEditor = await isAuthenticated(Astro.request, cmsEnv);
+const showDraft = isCmsEditor && Astro.url.searchParams.get('cms') === 'draft';
+const { projects } = await readProjects(cmsEnv, seedProjects, showDraft ? 'draft' : 'published');
+const project = projects.find((entry) => entry.slug === Astro.params.slug);
+if (!project && isCmsEditor && !showDraft) {
+	const draft = await readProjects(cmsEnv, seedProjects, 'draft');
+	if (draft.projects.some((entry) => entry.slug === Astro.params.slug)) return Astro.redirect(`${Astro.url.pathname}?cms=draft`);
 }
-
-const { project } = Astro.props;
-const isLocalEditor = import.meta.env.DEV;
+if (!project) return Astro.redirect(`/portfolio-projects${showDraft ? '?cms=draft' : ''}`);
 const galleryImages = project.images ?? [];
 ---
 
 <!doctype html>
 <html lang="zh-CN">
-	<head><BaseHead title={`${project.title} · 林未`} description={project.intro} /></head>
+	<head><BaseHead title={`${project.title} · Cyrene 文无`} description={project.intro} /></head>
 	<body>
-		<main class={project.color}>
-			<nav><div class="nav-left"><button class="back-button" type="button" data-go-back aria-label="返回上一页">←</button><a class="brand" href="/">LIN WEI<span>.</span></a></div><a href="/portfolio-coaching">← 返回辅导项目</a></nav>
+		<main class={project.color} data-project-slug={project.slug}>
+			<nav><div class="nav-left"><button class="back-button" type="button" data-go-back aria-label="返回上一页">←</button><a class="brand" href="/">Cyrene 文无<span>.</span></a></div><a href="/portfolio-coaching">← 返回辅导项目</a></nav>
 			<header>
 				<p>{project.index} / {project.service}</p>
 				<h1 data-edit-title>{project.title}</h1>
-				{galleryImages.length || isLocalEditor ? (
+				{galleryImages.length ? (
 					<section class="project-slider" data-carousel aria-label={`${project.title} 项目图片`}>
 						<div class="slider-track" data-track>
-							{galleryImages.map((image, index) => <img src={image} alt={`${project.title} 项目图 ${index + 1}`} loading={index === 0 ? 'eager' : 'lazy'} />)}
+							{galleryImages.map((source, index) => /\.(mp4|webm|mov)$/i.test(source)
+								? <video src={source} controls playsinline preload="metadata" aria-label={`${project.title} 项目视频 ${index + 1}`}></video>
+								: <img src={source} alt={`${project.title} 项目图 ${index + 1}`} loading={index === 0 ? 'eager' : 'lazy'} />)}
 						</div>
 						<div class="slider-controls">
 							<button type="button" class="slider-button previous" data-previous aria-label="上一张图片">←</button>
@@ -42,13 +50,15 @@ const galleryImages = project.images ?? [];
 			<section class="mentor">
 				<p class="label">项目辅导老师</p>
 				<div>
-					<h2 data-edit-mentor-name>Cyreneli</h2>
-					<p data-edit-mentor-bio>毕业于伦敦艺术大学（MSc Creative Computing），拥有 5 年作品集辅导经验。擅长引导学生发散思维，并指导学生完成技术落地，包括 VR 与 Web 端网页交互。同时是一线科学可视化设计师，擅长 3D 动态视频制作。</p>
+					<h2 data-edit-mentor-name>{project.mentorName ?? 'Cyreneli'}</h2>
+					<p data-edit-mentor-bio>{project.mentorBio ?? '毕业于伦敦艺术大学（MSc Creative Computing），拥有 5 年作品集辅导经验。擅长引导学生发散思维，并指导学生完成技术落地，包括 VR 与 Web 端网页交互。同时是一线科学可视化设计师，擅长 3D 动态视频制作。'}</p>
 				</div>
 			</section>
 			<section class="next"><p>想让你的项目也被好好讲述？</p><a href="mailto:hello@example.com?subject=作品集辅导咨询">预约咨询 <span>↗</span></a></section>
-			<footer><span>© 2026 LIN WEI</span><span>PROJECT TEMPLATE</span></footer>
-			{isLocalEditor && <>
+			<footer><span>© 2026 CYRENE 文无</span><span>PROJECT TEMPLATE</span></footer>
+			{isCmsEditor && <>
+				<aside class="cms-toolbar"><span>{showDraft ? '草稿预览' : '线上版本'}</span><a href={showDraft ? `/projects/${project.slug}` : `/projects/${project.slug}?cms=draft`}>{showDraft ? '查看线上版本' : '编辑草稿'}</a>{showDraft && <button type="button" data-cms-publish>发布</button>}<button type="button" data-cms-logout>退出</button><small data-cms-status></small></aside>
+				{showDraft && <>
 				<button class="editor-trigger" type="button" data-editor-open>编辑网站</button>
 				<dialog class="local-editor" data-local-editor>
 					<form method="dialog" data-editor-form>
@@ -59,10 +69,11 @@ const galleryImages = project.images ?? [];
 						<label>成果<textarea name="result" rows="4"></textarea></label>
 						<label>导师姓名<input name="mentorName" /></label>
 						<label>导师介绍<textarea name="mentorBio" rows="5"></textarea></label>
-						<label>替换轮播图片 <small>可多选；保存后会替换当前全部图片。</small><input name="images" type="file" accept="image/*" multiple /></label>
+						<label>轮播图片与视频 <small>在素材库中预览、搜索并多选</small><span class="cms-asset-field" data-asset-field><select name="imagePaths" data-gallery-assets multiple hidden></select><button type="button" data-asset-open>打开素材库</button><span class="cms-asset-selection" data-asset-preview></span></span></label>
 						<div class="editor-actions"><button type="button" data-editor-reset>清除本地修改</button><button type="submit">保存修改</button></div>
 					</form>
 				</dialog>
+				</>}
 			</>}
 		</main>
 	</body>
@@ -82,12 +93,12 @@ const galleryImages = project.images ?? [];
 	.project-slider { position: relative; overflow: hidden; border: 1px solid; background: #000; }
 	.slider-track { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; -ms-overflow-style: none; }
 	.slider-track::-webkit-scrollbar { display: none; }
-	.slider-track img { display: block; flex: 0 0 100%; width: 100%; aspect-ratio: 2.3 / 1; min-height: 300px; object-fit: cover; scroll-snap-align: start; border-radius: 0; }
+	.slider-track :is(img, video) { display: block; flex: 0 0 100%; width: 100%; aspect-ratio: 2.3 / 1; min-height: 300px; object-fit: cover; scroll-snap-align: start; border-radius: 0; }
 	.slider-controls { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; padding: 12px; }
 	.slider-button { width: 38px; height: 38px; border: 1px solid currentColor; border-radius: 50%; background: #f4f4f4; color: inherit; font-size: 20px; cursor: pointer; transition: background .2s, color .2s; }
 	.slider-button:hover { background: #4d4d4d; color: #f4f4f4; }.previous { justify-self: start; }.next { justify-self: end; }
 	.slider-dots { display: flex; align-items: center; gap: 7px; }.slider-dots button { width: 7px; height: 7px; padding: 0; border: 1px solid #4d4d4d; border-radius: 50%; background: transparent; cursor: pointer; transition: width .25s ease, border-radius .25s ease, background .25s ease; }.slider-dots button.active { width: 24px; border-radius: 999px; background: #4d4d4d; }
-	@media (max-width: 720px) { .slider-track img { min-height: 220px; aspect-ratio: 1.25 / 1; }.slider-controls { padding: 9px; }.slider-button { width: 34px; height: 34px; } }
+	@media (max-width: 720px) { .slider-track :is(img, video) { min-height: 220px; aspect-ratio: 1.25 / 1; }.slider-controls { padding: 9px; }.slider-button { width: 34px; height: 34px; } }
 	.project-slider { padding-bottom: 48px; overflow: visible; }
 	.slider-controls { position: static; padding: 0; }
 	.slider-button { position: absolute; z-index: 2; top: calc(50% - 43px); }
@@ -101,10 +112,12 @@ const galleryImages = project.images ?? [];
 	.nav-left { display: flex; align-items: center; gap: 13px; }.back-button { display: grid; place-items: center; width: 29px; height: 29px; padding: 0; border: 1px solid currentColor; border-radius: 50%; background: transparent; color: inherit; cursor: pointer; font-size: 16px; }.back-button:hover { background: #4d4d4d; color: #f4f4f4; }
 	.project-slider, .slider-track, .slider-track img { border-radius: 0 !important; }
 	.editor-trigger { position: fixed; right: 24px; bottom: 24px; z-index: 10; padding: 11px 16px; border: 1px solid #4d4d4d; border-radius: 999px; background: #4d4d4d; color: #f4f4f4; font-size: 13px; cursor: pointer; box-shadow: 0 7px 18px rgba(0,0,0,.14); }
-	.local-editor { width: min(620px, calc(100% - 30px)); max-height: calc(100vh - 40px); padding: 0; border: 1px solid #4d4d4d; background: #f4f4f4; color: #4d4d4d; }.local-editor::backdrop { background: rgba(0,0,0,.42); }.local-editor form { display: grid; gap: 16px; padding: 24px; overflow-y: auto; }.editor-heading, .editor-actions { display: flex; justify-content: space-between; align-items: center; gap: 16px; }.editor-heading p { margin: 0; font-size: 12px; letter-spacing: .08em; }.editor-heading button { border: 0; background: transparent; font-size: 27px; cursor: pointer; }.local-editor label { display: grid; gap: 7px; font-size: 13px; }.local-editor small { color: #777; font-size: 11px; }.local-editor input, .local-editor textarea { width: 100%; box-sizing: border-box; padding: 10px; border: 1px solid #9b9b9b; border-radius: 0; background: #fff; color: #1d1d1b; font: inherit; }.local-editor textarea { resize: vertical; }.editor-actions { padding-top: 8px; }.editor-actions button { padding: 10px 14px; border: 1px solid #4d4d4d; background: transparent; color: inherit; cursor: pointer; }.editor-actions button[type='submit'] { background: #4d4d4d; color: #f4f4f4; }
+	.cms-toolbar { position: fixed; right: 18px; bottom: 76px; z-index: 20; display: flex; align-items: center; gap: 9px; padding: 10px; border: 1px solid #777; background: #171717; color: #f4f4f4; box-shadow: 0 8px 28px rgb(0 0 0 / 35%); }.cms-toolbar span, .cms-toolbar small { font-size: 11px; }.cms-toolbar small { color: #9fd6b5; }.cms-toolbar a, .cms-toolbar button { padding: 8px 10px; border: 1px solid #777; background: transparent; color: inherit; font: inherit; font-size: 12px; text-decoration: none; cursor: pointer; }.cms-toolbar [data-cms-publish] { border-color: #f4f4f4; background: #f4f4f4; color: #171717; }
+	.local-editor { width: min(620px, calc(100% - 30px)); max-height: calc(100vh - 40px); padding: 0; border: 1px solid #4d4d4d; background: #f4f4f4; color: #4d4d4d; }.local-editor::backdrop { background: rgba(0,0,0,.42); }.local-editor form { display: grid; gap: 16px; padding: 24px; overflow-y: auto; }.editor-heading, .editor-actions { display: flex; justify-content: space-between; align-items: center; gap: 16px; }.editor-heading p { margin: 0; font-size: 12px; letter-spacing: .08em; }.editor-heading button { border: 0; background: transparent; font-size: 27px; cursor: pointer; }.local-editor label { display: grid; gap: 7px; font-size: 13px; }.local-editor small { color: #777; font-size: 11px; }.local-editor input, .local-editor textarea, .local-editor select { width: 100%; box-sizing: border-box; padding: 10px; border: 1px solid #9b9b9b; border-radius: 0; background: #fff; color: #1d1d1b; font: inherit; }.local-editor textarea { resize: vertical; }.local-editor select[multiple] { min-height: 230px; }.editor-actions { padding-top: 8px; }.editor-actions button { padding: 10px 14px; border: 1px solid #4d4d4d; background: transparent; color: inherit; cursor: pointer; }.editor-actions button[type='submit'] { background: #4d4d4d; color: #f4f4f4; }
 </style>
 
 <script>
+	import { initCmsAssetPickers } from '../../scripts/cms-asset-picker';
 	const setupCarousels = () => document.querySelectorAll<HTMLElement>('[data-carousel]').forEach((carousel) => {
 		if (carousel.dataset.ready) return;
 		carousel.dataset.ready = 'true';
@@ -155,11 +168,16 @@ const galleryImages = project.images ?? [];
 			});
 		};
 		const saveRecord = async (record: any) => {
-			const database = await openDatabase();
-			await new Promise<void>((resolve, reject) => {
-				const request = database.transaction('projects', 'readwrite').objectStore('projects').put(record, projectKey);
-				request.onsuccess = () => resolve(); request.onerror = () => reject(request.error);
-			});
+			const response = await fetch('/api/cms/projects?mode=draft');
+			if (!response.ok) throw new Error('无法读取 CMS 草稿');
+			const payload = await response.json();
+			const slug = document.querySelector<HTMLElement>('[data-project-slug]')?.dataset.projectSlug;
+			const project = payload.projects.find((entry: any) => entry.slug === slug);
+			if (!project) throw new Error('项目不存在');
+			Object.assign(project, record.fields);
+			if (record.images?.length) project.images = record.images;
+			const saved = await fetch('/api/cms/projects', { method: 'PUT', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ projects: payload.projects }) });
+			if (!saved.ok) throw new Error((await saved.json()).error || '保存失败');
 		};
 		const deleteRecord = async () => {
 			const database = await openDatabase();
@@ -185,29 +203,44 @@ const galleryImages = project.images ?? [];
 			track.innerHTML = record.images.map((source: string, index: number) => `<img src="${source}" alt="项目图 ${index + 1}">`).join('');
 			dots.innerHTML = record.images.map((_: string, index: number) => `<button type="button" data-dot="${index}" aria-label="查看第 ${index + 1} 张图片" class="${index === 0 ? 'active' : ''}"></button>`).join('');
 		};
-		const fileToDataUrl = (file: File) => new Promise<string>((resolve, reject) => {
-			const reader = new FileReader(); reader.onload = () => resolve(String(reader.result)); reader.onerror = () => reject(reader.error); reader.readAsDataURL(file);
-		});
 		const form = editor.querySelector<HTMLFormElement>('[data-editor-form]')!;
-		const fillForm = () => Object.entries(fields).forEach(([key, selector]) => {
-			const input = form.elements.namedItem(key) as HTMLInputElement | HTMLTextAreaElement;
-			const element = document.querySelector<HTMLElement>(selector);
-			if (input && element) input.value = element.textContent ?? '';
-		});
+		const assetSelect = form.querySelector<HTMLSelectElement>('[data-gallery-assets]')!;
+		const loadAssets = async () => {
+			await initCmsAssetPickers();
+		};
+		const fillForm = () => {
+			Object.entries(fields).forEach(([key, selector]) => {
+				const input = form.elements.namedItem(key) as HTMLInputElement | HTMLTextAreaElement;
+				const element = document.querySelector<HTMLElement>(selector);
+				if (input && element) input.value = element.textContent ?? '';
+			});
+			const selectedPaths = Array.from(document.querySelectorAll<HTMLImageElement | HTMLVideoElement>('[data-track] img, [data-track] video')).map((media) => media.getAttribute('src') ?? '').filter(Boolean);
+			selectedPaths.forEach((path) => { if (!Array.from(assetSelect.options).some((option) => option.value === path)) assetSelect.add(new Option(path, path)); });
+			Array.from(assetSelect.options).forEach((option) => { option.selected = selectedPaths.includes(option.value); });
+			assetSelect.dispatchEvent(new Event('change'));
+		};
 		document.querySelector<HTMLButtonElement>('[data-editor-open]')?.addEventListener('click', () => { fillForm(); editor.showModal(); });
 		editor.querySelector<HTMLButtonElement>('[data-editor-close]')?.addEventListener('click', () => editor.close());
 		editor.querySelector<HTMLButtonElement>('[data-editor-reset]')?.addEventListener('click', async () => { await deleteRecord(); window.location.reload(); });
 		form.addEventListener('submit', async (event) => {
 			event.preventDefault();
 			const formData = new FormData(form);
-			const current = await getRecord();
-			const imageFiles = formData.getAll('images').filter((file): file is File => file instanceof File && file.size > 0);
+			const images = formData.getAll('imagePaths').map(String).filter((path) => path.startsWith('/projects/'));
 			await saveRecord({
 				fields: Object.fromEntries(Object.keys(fields).map((key) => [key, String(formData.get(key) ?? '')])),
-				images: imageFiles.length ? await Promise.all(imageFiles.map(fileToDataUrl)) : current?.images,
+				images,
 			});
-			window.location.reload();
+			await deleteRecord();
+			window.location.href = window.location.pathname + '?cms=draft';
 		});
+		void loadAssets().then(() => fillForm());
 		getRecord().then((record) => { applyRecord(record); setupCarousels(); }).catch(() => setupCarousels());
 	}
+	document.querySelector('[data-cms-publish]')?.addEventListener('click', async () => {
+		if (!window.confirm('确定将当前草稿发布给所有访客吗？')) return;
+		const response = await fetch('/api/cms/projects', { method: 'POST' });
+		if (!response.ok) { window.alert('发布失败'); return; }
+		window.location.href = window.location.pathname;
+	});
+	document.querySelector('[data-cms-logout]')?.addEventListener('click', async () => { await fetch('/api/cms/logout', { method: 'POST' }); window.location.href = '/cms'; });
 </script>

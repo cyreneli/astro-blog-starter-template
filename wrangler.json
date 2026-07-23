@@ -10,5 +10,12 @@
 	"observability": {
 		"enabled": true
 	},
-	"upload_source_maps": true
+	"upload_source_maps": true,
+	"d1_databases": [
+		{
+			"binding": "CMS_DB",
+			"database_name": "cyrene-cms",
+			"database_id": "e42362d7-9ee7-47e7-80c4-6628c3587a7d"
+		}
+	]
 }

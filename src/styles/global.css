@@ -42,6 +42,33 @@ body {
 	font-size: 20px;
 	line-height: 1.7;
 }
+
+.cms-asset-field { display: grid; gap: 10px; }
+.cms-asset-field > button { justify-self: start; padding: 10px 14px; border: 1px solid currentColor; background: transparent; color: inherit; font: inherit; cursor: pointer; }
+.cms-asset-selection { display: grid; grid-template-columns: repeat(auto-fill, minmax(105px, 1fr)); gap: 8px; }
+.cms-asset-selected-item { min-width: 0; padding: 6px; border: 1px solid #aaa; background: #fff; }
+.cms-asset-selected-item span { display: block; overflow: hidden; margin-top: 5px; font-size: 10px; text-overflow: ellipsis; white-space: nowrap; }
+.cms-asset-thumb.compact { display: block; width: 100%; aspect-ratio: 1.5 / 1; object-fit: cover; }
+.cms-asset-empty { color: #777; font-size: 12px; }
+.cms-asset-dialog { width: min(1080px, calc(100% - 32px)); height: min(780px, calc(100vh - 32px)); box-sizing: border-box; padding: 0; border: 1px solid #555; background: #f4f4f4; color: #292929; }
+.cms-asset-dialog::backdrop { background: rgb(0 0 0 / 72%); }
+.cms-asset-dialog > header, .cms-asset-dialog > footer { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 18px 22px; border-bottom: 1px solid #aaa; }
+.cms-asset-dialog > header p { margin: 0 0 4px; font-size: 10px; letter-spacing: .1em; }
+.cms-asset-dialog > header h2 { margin: 0; font-size: 28px; font-weight: 400; }
+.cms-asset-close { border: 0; background: transparent; font-size: 30px; cursor: pointer; }
+.cms-asset-filters { display: grid; grid-template-columns: 1fr 220px; gap: 10px; padding: 14px 22px; }
+.cms-asset-filters input, .cms-asset-filters select { box-sizing: border-box; width: 100%; padding: 10px; border: 1px solid #aaa; background: #fff; font: inherit; }
+.cms-asset-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; height: calc(100% - 220px); padding: 8px 22px 20px; overflow-y: auto; }
+.cms-asset-card { position: relative; min-width: 0; padding: 7px; border: 2px solid transparent; background: #e6e6e6; color: inherit; text-align: left; cursor: pointer; }
+.cms-asset-card.selected { border-color: #ff5c35; background: #fff; }
+.cms-asset-card .cms-asset-thumb { display: block; width: 100%; aspect-ratio: 1.35 / 1; background: #222; object-fit: cover; }
+.cms-asset-card > span { display: block; overflow: hidden; padding-top: 7px; font-size: 11px; text-overflow: ellipsis; white-space: nowrap; }
+.cms-asset-card > b { position: absolute; top: 12px; right: 12px; padding: 3px 5px; background: #222; color: #fff; font-size: 8px; letter-spacing: .08em; }
+.cms-asset-dialog > footer { border-top: 1px solid #aaa; border-bottom: 0; }
+.cms-asset-dialog > footer button { padding: 9px 13px; border: 1px solid #777; background: transparent; color: inherit; cursor: pointer; }
+.cms-asset-dialog > footer .primary { margin-left: auto; background: #292929; color: #fff; }
+.cms-asset-count { font-size: 11px; color: #666; }
+@media (max-width: 620px) { .cms-asset-filters { grid-template-columns: 1fr; }.cms-asset-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); height: calc(100% - 270px); }.cms-asset-dialog > footer { flex-wrap: wrap; }.cms-asset-count { width: 100%; } }
 main {
 	width: 720px;
 	max-width: calc(100% - 2em);

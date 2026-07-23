@@ -13,6 +13,8 @@ export type Project = {
 	challenge: string;
 	approach: string[];
 	result: string;
+	mentorName?: string;
+	mentorBio?: string;
 	color: 'coral' | 'blue' | 'yellow';
 };
 

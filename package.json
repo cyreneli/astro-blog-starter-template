@@ -29,10 +29,14 @@
 	"scripts": {
 		"astro": "astro",
 		"build": "astro build",
+		"cms:migrate:local": "wrangler d1 migrations apply CMS_DB --local",
+		"cms:migrate:remote": "wrangler d1 migrations apply CMS_DB --remote",
 		"cf-typegen": "wrangler types",
 		"check": "astro build && tsc && wrangler deploy --dry-run",
 		"deploy": "wrangler deploy",
 		"dev": "astro dev",
+		"prebuild": "node scripts/generate-project-assets.mjs",
+		"predev": "node scripts/generate-project-assets.mjs",
 		"preview": "astro build && wrangler dev"
 	},
 	"type": "module"

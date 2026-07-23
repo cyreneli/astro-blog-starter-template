@@ -62,3 +62,36 @@ Check out [our documentation](https://docs.astro.build) or jump into our [Discor
 ## Credit
 
 This theme is based off of the lovely [Bear Blog](https://github.com/HermanMartinus/bearblog/).
+
+## 内容管理 CMS
+
+作品集项目已接入内置 CMS：D1 保存草稿与已发布版本，图片和视频等静态资源保存在 `public/projects/`。管理员从 `/cms` 登录，编辑时访问草稿预览，点击“发布”后公开页面才会更新。
+
+本地首次使用：
+
+```bash
+cp .dev.vars.example .dev.vars
+npm run cms:migrate:local
+npm run dev
+```
+
+在 `.dev.vars` 中设置本地管理员密码与足够长的随机 `CMS_SESSION_SECRET`，该文件不会提交到 Git。
+
+Cloudflare 首次部署：
+
+```bash
+npx wrangler login
+npx wrangler d1 create cyrene-cms
+```
+
+将 D1 创建命令返回的真实 `database_id` 写入 `wrangler.json`，替换全零占位 ID。然后配置生产密钥、应用 migration 并部署：
+
+```bash
+npx wrangler secret put CMS_PASSWORD
+npx wrangler secret put CMS_SESSION_SECRET
+npm run cms:migrate:remote
+npm run build
+npm run deploy
+```
+
+CMS 不负责上传静态资源。新增图片或视频时先放入 `public/projects/<项目目录>/` 并部署代码，再在编辑器中填写以 `/projects/` 开头的资源路径。不要把管理员密码、Session Secret 或 Cloudflare Token 写入源码或 `wrangler.json`。

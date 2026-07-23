@@ -1,12 +1,18 @@
 ---
 import BaseHead from '../components/BaseHead.astro';
-import { projects } from '../data/projects';
-const isLocalEditor = import.meta.env.DEV;
+import { projects as seedProjects } from '../data/projects';
+import { isAuthenticated, readProjects, type CmsBindings } from '../lib/cms';
+
+export const prerender = false;
+const cmsEnv = Astro.locals.runtime.env as CmsBindings;
+const isCmsEditor = await isAuthenticated(Astro.request, cmsEnv);
+const showDraft = isCmsEditor && Astro.url.searchParams.get('cms') === 'draft';
+const { projects } = await readProjects(cmsEnv, seedProjects, showDraft ? 'draft' : 'published');
 ---
 
 <!doctype html>
 <html lang="zh-CN">
-	<head><BaseHead title="作品集辅导项目 · 林未" description="作品集辅导项目陈列" /></head>
+	<head><BaseHead title="作品集辅导项目 · Cyrene 文无" description="作品集辅导项目陈列" /></head>
 	<body>
 		<main>
 			<nav aria-label="主导航">
@@ -16,21 +22,22 @@ const isLocalEditor = import.meta.env.DEV;
 				<a href="/contact">Contact <span>联系</span></a>
 			</nav>
 			<header><p>PORTFOLIO MENTORING / SELECTED WORK</p><h1>项目陈列</h1><p class="intro">每一份作品集，都始于不同的经验与问题。这里记录部分已经完成的辅导项目。</p></header>
-			<section class="project-grid" aria-label="作品集辅导项目">
+			<section class="project-grid" aria-label="作品集辅导项目" data-cms-draft={showDraft ? 'true' : undefined}>
 				{projects.map((project) => (
 					<div class="project-card-wrap" data-project-card data-project-id={project.slug}>
-						<a class:list={['project-card', project.color]} href={`/projects/${project.slug}`}>
+						<a class:list={['project-card', project.color]} href={`/projects/${project.slug}${showDraft ? '?cms=draft' : ''}`}>
 							<div class="cover" aria-hidden="true">{project.images?.[0] ? <img src={project.images[0]} alt="" /> : <><i></i><b></b></>}<span>{project.index}</span></div>
 							<div class="project-info"><h2>{project.title}</h2><div class="tags"><span>{project.school}</span><span>{project.major}</span><span>{project.term}</span></div><p>{project.summary}</p></div>
 						</a>
-						{isLocalEditor && <button class="card-edit" type="button" data-edit-card={project.slug} aria-label={`编辑 ${project.title}`}>编辑</button>}
+						{showDraft && <button class="card-edit" type="button" data-edit-card={project.slug} aria-label={`编辑 ${project.title}`}>编辑</button>}
 					</div>
 				))}
-				{isLocalEditor && <button class="project-add-card" type="button" data-add-card aria-label="增加新的项目">＋</button>}
+				{showDraft && <button class="project-add-card" type="button" data-add-card aria-label="增加新的项目">＋</button>}
 			</section>
 			<section class="contact"><p>想成为下一个项目？</p><a href="mailto:hello@example.com?subject=作品集辅导咨询">预约咨询 <span>↗</span></a></section>
-			<footer><span>© 2026 LIN WEI</span><span>SHANGHAI / REMOTE</span></footer>
-			{isLocalEditor && <>
+			<footer><span>© 2026 CYRENE 文无</span><span>SHANGHAI / REMOTE</span></footer>
+			{isCmsEditor && <>
+				<aside class="cms-toolbar" data-cms-toolbar><span>{showDraft ? '草稿预览' : '线上版本'}</span><a href={showDraft ? '/portfolio-projects' : '/portfolio-projects?cms=draft'}>{showDraft ? '查看线上版本' : '编辑草稿'}</a>{showDraft && <button type="button" data-cms-publish>发布</button>}<button type="button" data-cms-logout>退出</button><small data-cms-status></small></aside>
 				<dialog class="local-editor" data-list-editor>
 					<form data-list-editor-form>
 						<div class="editor-heading"><p>PROJECT EDITOR</p><button type="button" data-list-editor-close aria-label="关闭编辑器">×</button></div>
@@ -38,7 +45,7 @@ const isLocalEditor = import.meta.env.DEV;
 						<label>项目名称<input name="title" required /></label>
 						<label>项目标签 <small>以逗号分隔，例如：伦敦艺术大学, 交互设计, 27FALL</small><input name="tags" /></label>
 						<label>项目介绍<textarea name="summary" rows="5"></textarea></label>
-						<label>项目封面<input name="cover" type="file" accept="image/*" /></label>
+						<label>项目封面 <small>从 `public/projects/` 素材库中选择</small><span class="cms-asset-field" data-asset-field data-asset-kind="image"><select name="coverPath" data-cover-assets hidden><option value="">不使用封面</option></select><button type="button" data-asset-open>打开素材库</button><span class="cms-asset-selection" data-asset-preview></span></span></label>
 						<div class="editor-actions"><button type="button" data-delete-project>删除当前项目</button><button type="button" data-list-editor-reset>清除本地修改</button><button type="submit">保存修改</button></div>
 					</form>
 				</dialog>
@@ -59,6 +66,7 @@ const isLocalEditor = import.meta.env.DEV;
 	@media (max-width: 720px) { .project-grid { grid-template-columns: 1fr; gap: 28px; }.cover { height: auto; aspect-ratio: 1 / .72; }.project-card, .project-card + .project-card { padding: 0; border: 0; } }
 	@media (min-width: 721px) { .project-card:nth-child(3n + 1) { border-left: 0; } }
 	.card-edit { position: absolute; top: 9px; right: 9px; z-index: 2; padding: 6px 9px; border: 1px solid #4d4d4d; border-radius: 999px; background: #f4f4f4; color: #4d4d4d; font-size: 11px; cursor: pointer; }.card-edit:hover { background: #4d4d4d; color: #f4f4f4; }
+	.cms-toolbar { position: fixed; right: 18px; bottom: 18px; z-index: 20; display: flex; align-items: center; gap: 9px; padding: 10px; border: 1px solid #777; background: #171717; color: #f4f4f4; box-shadow: 0 8px 28px rgb(0 0 0 / 35%); }.cms-toolbar span, .cms-toolbar small { font-size: 11px; }.cms-toolbar small { color: #9fd6b5; }.cms-toolbar a, .cms-toolbar button { padding: 8px 10px; border: 1px solid #777; background: transparent; color: inherit; font: inherit; font-size: 12px; text-decoration: none; cursor: pointer; }.cms-toolbar [data-cms-publish] { border-color: #f4f4f4; background: #f4f4f4; color: #171717; }
 	.local-editor { width: min(580px, calc(100% - 30px)); max-height: calc(100vh - 40px); padding: 0; border: 1px solid #4d4d4d; background: #f4f4f4; color: #4d4d4d; }.local-editor::backdrop { background: rgba(0,0,0,.42); }.local-editor form { display: grid; gap: 15px; padding: 24px; overflow-y: auto; }.editor-heading, .editor-actions { display: flex; justify-content: space-between; align-items: center; gap: 12px; }.editor-heading p { margin: 0; font-size: 12px; letter-spacing: .08em; }.editor-heading button { border: 0; background: transparent; font-size: 27px; cursor: pointer; }.local-editor label { display: grid; gap: 7px; font-size: 13px; }.local-editor small { color: #777; font-size: 11px; }.local-editor input, .local-editor textarea, .local-editor select { width: 100%; box-sizing: border-box; padding: 10px; border: 1px solid #9b9b9b; border-radius: 0; background: #fff; color: #1d1d1b; font: inherit; }.local-editor textarea { resize: vertical; }.new-project { justify-self: start; border: 0; padding: 0; background: transparent; color: inherit; text-decoration: underline; cursor: pointer; }.editor-actions { padding-top: 8px; }.editor-actions button { padding: 10px 14px; border: 1px solid #4d4d4d; background: transparent; color: inherit; cursor: pointer; }.editor-actions button[type='submit'] { background: #4d4d4d; color: #f4f4f4; }
 	/* 首页统一主题覆盖 */
 	html, body { background: #2c2c2c !important; color: #f4f4f4 !important; font-family: Futura, 'Futura PT', 'Helvetica Neue', Arial, sans-serif; }
@@ -90,9 +98,11 @@ const isLocalEditor = import.meta.env.DEV;
 </style>
 
 <script>
+	import { initCmsAssetPickers } from '../scripts/cms-asset-picker';
 	const editor = document.querySelector<HTMLDialogElement>('[data-list-editor]');
 	if (editor) {
 		const grid = document.querySelector<HTMLElement>('.project-grid')!;
+		const draftSuffix = grid.dataset.cmsDraft === 'true' ? '?cms=draft' : '';
 		const key = 'local-project-list-v2';
 		const defaults = Array.from(document.querySelectorAll<HTMLElement>('[data-project-card]')).map((card, index) => ({
 			id: card.dataset.projectId ?? `project-${index}`,
@@ -100,7 +110,7 @@ const isLocalEditor = import.meta.env.DEV;
 			tags: Array.from(card.querySelectorAll('.tags span')).map((tag) => tag.textContent ?? ''),
 			summary: card.querySelector('.project-info p')?.textContent ?? '',
 			cover: card.querySelector<HTMLImageElement>('.cover img')?.getAttribute('src') ?? '',
-			href: card.getAttribute('href') ?? '#',
+			href: card.querySelector<HTMLAnchorElement>('.project-card')?.getAttribute('href') ?? `/projects/${card.dataset.projectId}`,
 			color: ['coral', 'blue', 'yellow'][index % 3],
 		}));
 		const openDatabase = () => new Promise<IDBDatabase>((resolve, reject) => {
@@ -116,11 +126,32 @@ const isLocalEditor = import.meta.env.DEV;
 			});
 		};
 		const saveItems = async (items: any[]) => {
-			const database = await openDatabase();
-			await new Promise<void>((resolve, reject) => {
-				const request = database.transaction('projects', 'readwrite').objectStore('projects').put(items, key);
-				request.onsuccess = () => resolve(); request.onerror = () => reject(request.error);
+			const draftResponse = await fetch('/api/cms/projects?mode=draft');
+			if (!draftResponse.ok) throw new Error('无法读取 CMS 草稿');
+			const draft = await draftResponse.json();
+			const projects = items.map((item, index) => {
+				const existing = draft.projects.find((entry: any) => entry.slug === item.id);
+				const tags = item.tags ?? [];
+				const images = [...(existing?.images ?? [])];
+				if (item.cover) images[0] = item.cover;
+				return {
+					...(existing ?? {}),
+					slug: item.id,
+					service: existing?.service ?? '作品集辅导',
+					index: String(index + 1).padStart(2, '0'),
+					title: item.title,
+					subtitle: existing?.subtitle ?? '作品集项目',
+					summary: item.summary,
+					school: tags[0] ?? '', major: tags[1] ?? '', term: tags[2] ?? '',
+					images,
+					intro: existing?.intro ?? item.summary,
+					challenge: existing?.challenge ?? '', approach: existing?.approach ?? [], result: existing?.result ?? '',
+					color: item.color ?? existing?.color ?? ['coral', 'blue', 'yellow'][index % 3],
+				};
 			});
+			const response = await fetch('/api/cms/projects', { method: 'PUT', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ projects }) });
+			if (!response.ok) throw new Error((await response.json()).error || '保存失败');
+			const status = document.querySelector<HTMLElement>('[data-cms-status]'); if (status) status.textContent = '草稿已保存';
 		};
 		const deleteItems = async () => {
 			const database = await openDatabase();
@@ -138,7 +169,9 @@ const isLocalEditor = import.meta.env.DEV;
 			grid.innerHTML = '';
 			items.forEach((item, index) => {
 			const wrapper = document.createElement('div'); wrapper.className = 'project-card-wrap';
-			const card = document.createElement('a'); card.className = `project-card ${item.color ?? ['coral', 'blue', 'yellow'][index % 3]}`; card.href = item.href && item.href !== '#' ? item.href : (String(item.id).startsWith('local-') ? '/projects/local?id=' + item.id : '#');
+			const card = document.createElement('a'); card.className = `project-card ${item.color ?? ['coral', 'blue', 'yellow'][index % 3]}`;
+			const baseHref = item.href && item.href !== '#' ? String(item.href).split('?')[0] : '/projects/' + item.id;
+			card.href = baseHref + draftSuffix;
 				const cover = document.createElement('div'); cover.className = 'cover';
 				if (item.cover) { const image = document.createElement('img'); image.src = item.cover; image.alt = ''; cover.append(image); }
 				else { cover.append(document.createElement('i'), document.createElement('b')); }
@@ -154,20 +187,25 @@ const isLocalEditor = import.meta.env.DEV;
 		};
 		const form = editor.querySelector<HTMLFormElement>('[data-list-editor-form]')!;
 		const select = form.querySelector<HTMLSelectElement>('[data-project-select]')!;
+		const coverSelect = form.querySelector<HTMLSelectElement>('[data-cover-assets]')!;
 		let items = defaults;
+		const loadAssets = async () => {
+			await initCmsAssetPickers();
+		};
 		const fillSelect = () => { select.innerHTML = `${items.map((item) => `<option value="${item.id}">${item.title || '未命名项目'}</option>`).join('')}<option value="__new__">+ 增加新的项目</option>`; };
 		const fillForm = () => {
 			const item = items.find((entry) => entry.id === select.value) ?? items[0]; if (!item) return;
 			(form.elements.namedItem('title') as HTMLInputElement).value = item.title ?? '';
 			(form.elements.namedItem('tags') as HTMLInputElement).value = (item.tags ?? []).join(', ');
 			(form.elements.namedItem('summary') as HTMLTextAreaElement).value = item.summary ?? '';
-			(form.elements.namedItem('cover') as HTMLInputElement).value = '';
+			if (item.cover && !Array.from(coverSelect.options).some((option) => option.value === item.cover)) coverSelect.add(new Option(item.cover, item.cover));
+			coverSelect.value = item.cover ?? '';
+			coverSelect.dispatchEvent(new Event('change'));
 		};
-		const readImage = (file: File) => new Promise<string>((resolve, reject) => { const reader = new FileReader(); reader.onload = () => resolve(String(reader.result)); reader.onerror = () => reject(reader.error); reader.readAsDataURL(file); });
 		editor.querySelector<HTMLButtonElement>('[data-list-editor-close]')?.addEventListener('click', () => editor.close());
 		const addProject = () => {
 			const id = `local-${Date.now()}`;
-			const item = { id, title: '新项目', tags: ['目标院校', '目标专业', '27FALL'], summary: '这是一个正在整理中的项目。你可以在这里补充项目背景、核心概念与最终成果。', cover: '', href: `/projects/local?id=${id}`, color: ['coral', 'blue', 'yellow'][items.length % 3] };
+			const item = { id, title: '新项目', tags: ['目标院校', '目标专业', '27FALL'], summary: '这是一个正在整理中的项目。你可以在这里补充项目背景、核心概念与最终成果。', cover: '', href: `/projects/${id}${draftSuffix}`, color: ['coral', 'blue', 'yellow'][items.length % 3] };
 			items.push(item); renderItems(items); void saveItems(items); fillSelect(); select.value = item.id; fillForm();
 		};
 		grid.addEventListener('click', (event) => {
@@ -185,10 +223,11 @@ const isLocalEditor = import.meta.env.DEV;
 		form.addEventListener('submit', async (event) => {
 			event.preventDefault(); const formData = new FormData(form); const item = items.find((entry) => entry.id === select.value); if (!item) return;
 			item.title = String(formData.get('title') ?? ''); item.tags = String(formData.get('tags') ?? '').split(',').map((tag) => tag.trim()).filter(Boolean); item.summary = String(formData.get('summary') ?? '');
-			const image = formData.get('cover'); if (image instanceof File && image.size) item.cover = await readImage(image);
+			item.cover = String(formData.get('coverPath') ?? '').trim();
 			await saveItems(items); renderItems(items); editor.close();
 		});
-		editor.querySelector<HTMLButtonElement>('[data-list-editor-reset]')?.addEventListener('click', async () => { await deleteItems(); items = defaults; renderItems(items); editor.close(); });
+		editor.querySelector<HTMLButtonElement>('[data-list-editor-reset]')?.addEventListener('click', async () => { await deleteItems(); items = defaults; await saveItems(items); renderItems(items); editor.close(); });
+		void loadAssets().then(() => fillForm());
 		getItems().then((saved) => {
 			if (!saved?.length) return;
 			items = saved.map((item) => ({
@@ -196,10 +235,16 @@ const isLocalEditor = import.meta.env.DEV;
 				title: item.title || '新项目',
 				tags: item.tags?.length ? item.tags : ['目标院校', '目标专业', '27FALL'],
 				summary: item.summary || '这是一个正在整理中的项目。你可以在这里补充项目背景、核心概念与最终成果。',
-				href: item.href && item.href !== '#' ? item.href : (String(item.id).startsWith('local-') ? '/projects/local?id=' + item.id : '#'),
+				href: item.href && item.href !== '#' ? item.href : '/projects/' + item.id,
 			}));
 			renderItems(items);
-			void saveItems(items);
 		}).catch(() => undefined);
 	}
+	document.querySelector('[data-cms-publish]')?.addEventListener('click', async () => {
+		if (!window.confirm('确定将当前草稿发布给所有访客吗？')) return;
+		const response = await fetch('/api/cms/projects', { method: 'POST' });
+		if (!response.ok) { window.alert('发布失败'); return; }
+		window.location.href = '/portfolio-projects';
+	});
+	document.querySelector('[data-cms-logout]')?.addEventListener('click', async () => { await fetch('/api/cms/logout', { method: 'POST' }); window.location.href = '/cms'; });
 </script>
