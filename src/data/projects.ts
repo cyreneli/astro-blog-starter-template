@@ -1,3 +1,5 @@
+import { projectAssets } from './project-assets';
+
 export type Project = {
 	slug: string;
 	service: string;
@@ -17,6 +19,31 @@ export type Project = {
 	mentorBio?: string;
 	color: 'coral' | 'blue' | 'yellow';
 };
+
+const layoutProject = (
+	index: string,
+	slug: string,
+	title: string,
+	major: string,
+	folder: string,
+	cover?: string,
+): Project => ({
+	slug,
+	service: '排版项目陈列',
+	index,
+	title,
+	subtitle: `${major} / 排版辅导`,
+	summary: `《${title}》排版辅导项目，点击查看完整项目内容。`,
+	school: '排版辅导',
+	major,
+	term: '项目陈列',
+	images: projectAssets.filter((asset) => asset.startsWith(`/projects/LAYOUT/${folder}/`)),
+	intro: `这是《${title}》的项目展示页面。可在此继续补充项目背景、研究过程与排版设计说明。`,
+	challenge: '在有限篇幅内建立清晰、连贯的项目阅读节奏。',
+	approach: ['梳理信息层级与叙事顺序', '建立页面网格与字体系统', '优化图文关系与整体节奏'],
+	result: '完成一套结构清晰、视觉统一的项目呈现。',
+	color: ['coral', 'blue', 'yellow'][Number(index) % 3] as Project['color'],
+});
 
 export const projects: Project[] = [
 	{
@@ -78,4 +105,25 @@ export const projects: Project[] = [
 		result: '研究不再只是静态文本，而成为观众可以自行进入、停留与发现的数字现场。',
 		color: 'yellow',
 	},
+	layoutProject('01', 'layout-a-confession', 'A Confession', '电影', 'A Confession 电影', '1.png'),
+	layoutProject('02', 'layout-behhind-the-gaze', 'Behhind the gaze', '纯艺', 'Behhind the gaze 纯艺', 'Frame 13.png'),
+	layoutProject('03', 'layout-bound-to-bloom', 'Bound to Bloom', '纯艺', 'Bound to Bloom 纯艺', 'Frame 20.png'),
+	layoutProject('04', 'layout-cat', 'cat', '交互', 'cat 交互', '1.png'),
+	layoutProject('05', 'layout-farmfresh', 'FarmFresh', '交互', 'FarmFresh 交互', 'Frame 152.png'),
+	layoutProject('06', 'layout-fragments-of-being', 'Fragments of Being', '纯艺', 'Fragments of Being纯艺', 'Frame 15.png'),
+	layoutProject('07', 'layout-her-absence', 'Her Absence', '电影', 'Her Absence 电影', '1.png'),
+	layoutProject('08', 'layout-holosport', 'Holosport', '交互', 'Holosport 交互', 'Frame 158.png'),
+	layoutProject('09', 'layout-hugtopid', 'Hugtopid', '未标注专业', 'Hugtopid', '1.png'),
+	layoutProject('10', 'layout-meow-tales', 'Meow Tales', '交互', 'Meow Tales 交互', 'Frame 163.png'),
+	layoutProject('11', 'layout-nutrisynth', 'NutriSynth', '游戏设计', 'NutriSynth 游戏设计', 'Project1-2.png'),
+	layoutProject('12', 'layout-pawtopia', 'Pawtopia', '未标注专业', 'Pawtopia', '2.jpg'),
+	layoutProject('13', 'layout-schrodingrs-airline-box', "SCHRODINGR'S AIRLINE BOX", '未标注专业', "SCHRODINGR'S AIRLINE BOX", 'page1.png'),
+	layoutProject('14', 'layout-still-awake', 'still awake', '纯艺', 'still awake 纯艺', 'Frame 21.png'),
+	layoutProject('15', 'layout-synthetic-souls', 'Synthetic souls', '交互', 'Synthetic souls交互', 'Frame 168.png'),
+	layoutProject('16', 'layout-thalassa-whisper', 'Thalassa Whisper', '交互', 'Thalassa Whisper 交互', 'Frame 1.png'),
+	layoutProject('17', 'layout-opera-vr', '京剧VR', '交互', '京剧VR 交互'),
+	layoutProject('18', 'layout-kaifusi', '开福寺项目', '未标注专业', '开福寺项目', 'P2 Project Start Point & Topic Background.png'),
+	layoutProject('19', 'layout-dunhuang', '敦煌藻井', '交互', '敦煌藻井交互', 'Frame 1.png'),
+	layoutProject('20', 'layout-life-release', '生命放生计划', '未标注专业', '生命放生计划', '1.png'),
+	layoutProject('21', 'layout-elephant-herd', '象群', '交互', '象群 交互', 'P1.png'),
 ];
