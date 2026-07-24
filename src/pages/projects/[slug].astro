@@ -8,7 +8,11 @@ const cmsEnv = Astro.locals.runtime.env as CmsBindings;
 const isCmsEditor = await isAuthenticated(Astro.request, cmsEnv);
 const showDraft = isCmsEditor && Astro.url.searchParams.get('cms') === 'draft';
 const { projects } = await readProjects(cmsEnv, seedProjects, showDraft ? 'draft' : 'published');
-const project = projects.find((entry) => entry.slug === Astro.params.slug);
+// CMS 数据优先；新加入代码库、尚未写入 CMS 的项目则使用内置数据。
+// 这样项目陈列卡片不会因为 CMS 暂无对应记录而被重定向回列表页。
+const project =
+  projects.find((entry) => entry.slug === Astro.params.slug) ??
+  seedProjects.find((entry) => entry.slug === Astro.params.slug);
 if (!project && isCmsEditor && !showDraft) {
 	const draft = await readProjects(cmsEnv, seedProjects, 'draft');
 	if (draft.projects.some((entry) => entry.slug === Astro.params.slug)) return Astro.redirect(`${Astro.url.pathname}?cms=draft`);
